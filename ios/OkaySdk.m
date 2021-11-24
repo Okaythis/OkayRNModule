@@ -17,13 +17,11 @@ RCT_EXTERN_METHOD(enrollProcedure:(NSDictionary *)spaEnrollData
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(linkTenant:(int)linkingCode
-                  (NSDictionary *)spaStorage
+RCT_EXTERN_METHOD(linkTenant:(int)linkingCode spaStorage:(NSDictionary *)spaStorage
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(unlinkTenant:(int)tenantId
-                  (NSDictionary *)spaStorage
+RCT_EXTERN_METHOD(unlinkTenant:(int)tenantId spaStorage:(NSDictionary *)spaStorage
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
