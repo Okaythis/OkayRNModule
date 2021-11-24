@@ -9,7 +9,7 @@ PODS:
     - React-Core (= 0.63.4)
     - React-jsi (= 0.63.4)
     - ReactCommon/turbomodule/core (= 0.63.4)
-  - FccAbstractCore (1.0.9)
+  - FccAbstractCore (1.0.6)
   - Folly (2020.01.13.00):
     - boost-for-react-native
     - DoubleConversion
@@ -21,13 +21,11 @@ PODS:
     - glog
   - glog (0.3.5)
   - PSACommonSDK (1.2.6)
-  - PSASDK (1.1.18.2):
-    - FccAbstractCore (= 1.0.9)
+  - PSASDK (1.1.17.5):
+    - FccAbstractCore (= 1.0.6)
     - PSAUIiOS (= 1.2.3)
-    - PSAWaterMarker (= 0.0.1)
   - PSAUIiOS (1.2.3):
     - PSACommonSDK (~> 1.2.6)
-  - PSAWaterMarker (0.0.1)
   - RCTRequired (0.63.4)
   - RCTTypeSafety (0.63.4):
     - FBLazyVector (= 0.63.4)
@@ -195,7 +193,8 @@ PODS:
     - React-jsi (= 0.63.4)
   - React-jsinspector (0.63.4)
   - react-native-okay-sdk (0.1.0):
-    - PSASDK (= 1.1.18.2)
+    - FccAbstractCore (= 1.0.6)
+    - PSASDK (~> 1.1.17)
     - React-Core
   - React-RCTActionSheet (0.63.4):
     - React-Core/RCTActionSheetHeaders (= 0.63.4)
@@ -297,7 +296,6 @@ SPEC REPOS:
     - PSACommonSDK
     - PSASDK
     - PSAUIiOS
-    - PSAWaterMarker
 
 EXTERNAL SOURCES:
   DoubleConversion:
@@ -360,13 +358,12 @@ SPEC CHECKSUMS:
   DoubleConversion: cde416483dac037923206447da6e1454df403714
   FBLazyVector: 3bb422f41b18121b71783a905c10e58606f7dc3e
   FBReactNativeSpec: f2c97f2529dd79c083355182cc158c9f98f4bd6e
-  FccAbstractCore: c6f5c2c958f5579c37a6746294defff1544418b0
+  FccAbstractCore: 7f52af5362ba298d7e66515282bb05c004d5df22
   Folly: b73c3869541e86821df3c387eb0af5f65addfab4
   glog: 40a13f7840415b9a77023fbcae0f1e6f43192af3
   PSACommonSDK: 53cef9432b55ceae3fbf68e030ed517ad7f9e437
-  PSASDK: 9bb7268842a1ec9acbb3eddf86f5ee080f27f49d
+  PSASDK: d16b038c781ddb50f9d6d1a9188440913a927a53
   PSAUIiOS: 61978da2c6ffb03bf12d136cf8c5eb4e32a79666
-  PSAWaterMarker: 7cf6818c178de313e466f33c7215f7981eaa1555
   RCTRequired: 082f10cd3f905d6c124597fd1c14f6f2655ff65e
   RCTTypeSafety: 8c9c544ecbf20337d069e4ae7fd9a377aadf504b
   React: b0a957a2c44da4113b0c4c9853d8387f8e64e615
@@ -377,7 +374,7 @@ SPEC CHECKSUMS:
   React-jsi: a0418934cf48f25b485631deb27c64dc40fb4c31
   React-jsiexecutor: 93bd528844ad21dc07aab1c67cb10abae6df6949
   React-jsinspector: 58aef7155bc9a9683f5b60b35eccea8722a4f53a
-  react-native-okay-sdk: d7c93385bb038a1f8686b17d741baff01f6ad1c9
+  react-native-okay-sdk: 33b4856b7922c5e3a0e9ce778d9c7ca7b2241eae
   React-RCTActionSheet: 89a0ca9f4a06c1f93c26067af074ccdce0f40336
   React-RCTAnimation: 1bde3ecc0c104c55df246eda516e0deb03c4e49b
   React-RCTBlob: a97d378b527740cc667e03ebfa183a75231ab0f0
@@ -390,6 +387,6 @@ SPEC CHECKSUMS:
   ReactCommon: 73d79c7039f473b76db6ff7c6b159c478acbbb3b
   Yoga: 4bd86afe9883422a7c4028c00e34790f560923d6
 
-PODFILE CHECKSUM: 22412ad015df5237288cc75bfbc6d69ffd684408
+PODFILE CHECKSUM: fc17184de67b900f28c19d70901f8c9492799260
 
 COCOAPODS: 1.11.2

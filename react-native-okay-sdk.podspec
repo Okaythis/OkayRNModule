@@ -16,5 +16,6 @@ Pod::Spec.new do |s|
   s.source_files = "ios/**/*.{h,m,mm,swift}"
 
   s.dependency "React-Core"
-  s.dependency "PSASDK", "1.1.18.2"
+  s.dependency "PSASDK", "~> 1.1.17"
+  s.dependency "FccAbstractCore", "1.0.6"
 end
