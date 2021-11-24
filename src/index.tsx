@@ -32,10 +32,10 @@ export function isEnrolled(): Promise<string> {
 }
 
 export function linkTenant(): Promise<string> {
-  return OkaySdk.linkTenant(1, {}).then(console.log)
+  return OkaySdk.linkTenant("1").then(console.log)
 }
 export function unlinkTenant(): Promise<string> {
-  return OkaySdk.unlinkTenant(1, {}).then(console.log)
+  return OkaySdk.unlinkTenant(1).then(console.log)
 }
 export function enrollProcedure(): Promise<string> {
   return OkaySdk.enrollProcedure({

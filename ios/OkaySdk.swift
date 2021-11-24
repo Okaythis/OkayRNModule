@@ -73,8 +73,8 @@ class OkaySdk: NSObject {
                 reject("Error", "Wrong data passed", nil)
                 return
             }
-            if PSA.isReadyForEnrollment() {
-                PSA.startEnrollment(withHost: host,
+            if try PSA.isReadyForEnrollment() {
+                try PSA.startEnrollment(withHost: host,
                                     invisibly: true,
                                     installationId: installationId,
                                     resourceProvider: resourceProvider,
@@ -90,19 +90,36 @@ class OkaySdk: NSObject {
         }
     }
 
-    @objc(linkTenant:spaStorage:withResolver:withRejecter:)
-    func linkTenant(linkingCode:Int, spaStorage: NSDictionary, resolve:RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) -> Void {
-        resolve("Method linkTenant is not implemented yet");
+    @objc(linkTenant:withResolver:withRejecter:)
+    func linkTenant(linkingCode: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
+        do {
+            try PSA.linkTenant(withLinkingCode: linkingCode, completion: { status, tenant in
+                resolve(status)
+            })
+        } catch {
+            reject("Error", "Failed to link tenant", error)
+        }
     }
 
-    @objc(unlinkTenant:spaStorage:withResolver:withRejecter:)
-    func unlinkTenant(tenantId:Int, spaStorage: NSDictionary, resolve:RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) -> Void {
-        resolve("Method unlinkTenant is not implemented yet");
+    @objc(unlinkTenant:withResolver:withRejecter:)
+    func unlinkTenant(tenantId: NSNumber, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
+        do {
+            PSA.unlinkTenant(withTenantId: tenantId) { status, id in
+                resolve(status)
+            }
+        } catch {
+            reject("Error", "Failed to link tenant", error)
+        }
     }
 
     @objc(isReadyForAuthorization:withRejecter:)
     func isReadyForAuthorization(resolve:RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) -> Void {
-        resolve("Method isReadyForAuthorization is not implemented yet");
+        do {
+            let isReady = try PSA.isReadyForAuthorization()
+            resolve(isReady)
+        } catch {
+            reject("Error", "Error", error)
+        }
     }
 
     @objc(authorization:withResolver:withRejecter:)
