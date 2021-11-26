@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { StyleSheet, View, Text, SafeAreaView, TextInput, TouchableOpacity } from 'react-native';
-import { authorization, enrollProcedure, isEnrolled, isReadyForAuthorization, linkTenant, multiply, unlinkTenant, updateDeviceToken } from 'react-native-okay-sdk';
+import { authorization, enrollProcedure, isEnrolled, isReadyForAuthorization, linkTenant, unlinkTenant, updateDeviceToken } from 'react-native-okay-sdk';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
 
 export default function App() {
