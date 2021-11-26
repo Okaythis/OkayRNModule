@@ -28,7 +28,7 @@ RCT_EXTERN_METHOD(unlinkTenant:(nonnull NSNumber *)tenantId
 RCT_EXTERN_METHOD(isReadyForAuthorization:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(authorization:(NSDictionary *)spaAuthorizationData
+RCT_EXTERN_METHOD(authorization:(nonnull NSNumber *)sessionId
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 @end

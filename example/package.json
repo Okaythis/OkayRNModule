@@ -6,9 +6,11 @@
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
-    "start": "react-native start"
+    "start": "react-native start",
+    "bundle": "react-native bundle --dev false --entry-file index.tsx --bundle-output ios/main.jsbundle --platform ios"
   },
   "dependencies": {
+    "@react-native-community/push-notification-ios": "^1.10.1",
     "react": "16.13.1",
     "react-native": "0.63.4"
   },

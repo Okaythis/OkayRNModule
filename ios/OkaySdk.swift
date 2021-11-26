@@ -1,6 +1,6 @@
 import PSA
 
-class Test: ResourceProvider {
+class CustomResourceProvider: ResourceProvider {
     var biometricAlertReasonText: NSAttributedString!
     
     var confirmButtonText: NSAttributedString!
@@ -36,11 +36,14 @@ class Test: ResourceProvider {
 
 @objc(OkaySdk)
 class OkaySdk: NSObject {
+    
+    var tenantTheme: PSATheme?
 
     @objc(multiply:withB:withResolver:withRejecter:)
     func multiply(a: Float, b: Float, resolve:RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) -> Void {
         resolve(a*b)
     }
+
     @objc(updateDeviceToken:withResolver:withRejecter:)
     func updateDeviceToken(deviceToken: String, resolve:RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) -> Void {
         do {
@@ -64,7 +67,7 @@ class OkaySdk: NSObject {
     @objc(enrollProcedure:withResolver:withRejecter:)
     func enrollProcedure(spaEnrollData: NSDictionary, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
         do {
-            let resourceProvider: ResourceProvider = Test()
+            let resourceProvider: ResourceProvider = CustomResourceProvider()
             guard let enrollData = spaEnrollData["SpaEnrollData"] as? [String: String],
                 let host = enrollData["host"],
                 let pubPss = enrollData["pubPss"],
@@ -78,10 +81,13 @@ class OkaySdk: NSObject {
                                     invisibly: true,
                                     installationId: installationId,
                                     resourceProvider: resourceProvider,
-                                    pubPssBase64: pubPss,
-                                    idCompletion: { status in
-                    resolve(status)
-                })
+                                    pubPssBase64: pubPss) { status in
+                    if status.rawValue == 1 {
+                        resolve("Success")
+                    } else {
+                        reject("Error", "Failed with code: \(status.rawValue)", nil)
+                    }
+                }
             } else {
                 reject("Error", "PSA is not ready for enrollment", nil)
             }
@@ -94,7 +100,13 @@ class OkaySdk: NSObject {
     func linkTenant(linkingCode: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
         do {
             try PSA.linkTenant(withLinkingCode: linkingCode, completion: { status, tenant in
-                resolve(status)
+                if status.rawValue == 1 {
+                    self.tenantTheme = tenant.theme
+                    resolve(tenant.tenantId)
+                } else {
+                    reject("Error", "Failed with code: \(status.rawValue)", nil)
+                }
+
             })
         } catch {
             reject("Error", "Failed to link tenant", error)
@@ -105,7 +117,11 @@ class OkaySdk: NSObject {
     func unlinkTenant(tenantId: NSNumber, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
         do {
             PSA.unlinkTenant(withTenantId: tenantId) { status, id in
-                resolve(status)
+                if status.rawValue == 1 {
+                    resolve("Success")
+                } else {
+                    reject("Error", "Failed with code: \(status.rawValue)", nil)
+                }
             }
         } catch {
             reject("Error", "Failed to link tenant", error)
@@ -113,7 +129,7 @@ class OkaySdk: NSObject {
     }
 
     @objc(isReadyForAuthorization:withRejecter:)
-    func isReadyForAuthorization(resolve:RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) -> Void {
+    func isReadyForAuthorization(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) -> Void {
         do {
             let isReady = try PSA.isReadyForAuthorization()
             resolve(isReady)
@@ -123,7 +139,19 @@ class OkaySdk: NSObject {
     }
 
     @objc(authorization:withResolver:withRejecter:)
-    func authorization(authorizationData: NSDictionary, resolve:RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) -> Void {
-        resolve("Method authorization is not implemented yet");
+    func authorization(sessionId: NSNumber, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
+        do {
+            if PSA.isReadyForAuthorization() {
+                try PSA.startAuthorization(with: tenantTheme, sessionId: sessionId) {isCancelled, status in
+                    if !isCancelled && status.rawValue == 1 {
+                        resolve("Success")
+                    } else {
+                        reject("Error", "Failed with code: \(status.rawValue)", nil)
+                    }
+                }
+            }
+        } catch {
+            reject("Error", "Failed to start authorization", error)
+        }
     }
 }
