@@ -1,41 +1,58 @@
 import * as React from 'react';
 
 import { StyleSheet, View, Text, SafeAreaView, TextInput, TouchableOpacity } from 'react-native';
-import { authorization, enrollProcedure, isEnrolled, isReadyForAuthorization, linkTenant, multiply, unlinkTenant, updateDeviceToken } from 'react-native-okay-sdk';
-import PushNotificationIOS from '@react-native-community/push-notification-ios';
+import { authorization, enrollProcedure, isEnrolled, isReadyForAuthorization, linkTenant, unlinkTenant, updateDeviceToken } from 'react-native-okay-sdk';
+import messaging from '@react-native-firebase/messaging';
+
+
+interface Tenant {
+  tenantId: number,
+  name: string,
+  theme: any
+}
+
+async function requestUserPermission() {
+  const authStatus = await messaging().requestPermission();
+  const enabled =
+    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+  if (enabled) {
+    console.log('Authorization status:', authStatus);
+    messaging().getToken().then(token => {
+      updateDeviceToken(token || '');
+    })
+  }
+}
 
 export default function App() {
   const [linkingCode, setLinkingCode] = React.useState('');
-  const [tenantId, setTenantId] = React.useState('1');
-  const [sessionId, setSessionId] = React.useState('1');
+  const [sessionId, setSessionId] = React.useState('');
+  const [tenant, setTenant] = React.useState<Tenant>({} as Tenant);
 
   React.useEffect(() => {
-    PushNotificationIOS.requestPermissions().then(console.log);
-    PushNotificationIOS.addEventListener("register", (token) => {
-      console.log('registered to push notif', token)
-      updateDeviceToken(token)
-    })
-    PushNotificationIOS.addEventListener("notification", (notification) => {
-      const data = notification.getData();
-      setSessionId(data?.sessionId);
-      console.log('received notification: ', notification, data);
-    })
-    return () => {
-      PushNotificationIOS.removeEventListener("register")
-      PushNotificationIOS.removeEventListener("notification")
-    }
+    requestUserPermission();
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      console.log('A new FCM message received!', remoteMessage.data?.data);
+      const id = JSON.parse(remoteMessage?.data?.data ?? '')?.sessionId
+      setSessionId(id?.toString() ?? '');
+
+    });
+
+    return unsubscribe
   }, []);
 
   const onLinkTenantClick = () => {
-    linkTenant(linkingCode)
+    linkTenant(linkingCode).then((t: Tenant) => {
+      setTenant(t)
+    })
   }
 
   const onUnlinkTenantClick = () => {
-    unlinkTenant(+tenantId)
+    unlinkTenant(tenant.tenantId)
   }
 
   const onAuthClick = () => {
-    authorization(+sessionId);
+    authorization(Number(sessionId));
   }
 
   return (
@@ -57,8 +74,11 @@ export default function App() {
         style={styles.textInput}
           keyboardType={'numeric'}
           placeholder="Enter tenant ID"
-          value={tenantId}
-          onChangeText={setTenantId}
+          value={tenant?.tenantId?.toString() ?? ''}
+          onChangeText={(val) => setTenant(prevState => ({
+            ...prevState,
+            tenantId: +val
+          }))}
         />
         <TouchableOpacity style={styles.button} onPress={onUnlinkTenantClick}>
           <Text style={styles.buttonText}>Unlink tenant</Text>
@@ -66,6 +86,12 @@ export default function App() {
         <TouchableOpacity style={styles.button} onPress={isReadyForAuthorization}>
           <Text style={styles.buttonText}>isReadyForAuthorization</Text>
         </TouchableOpacity>
+        <TextInput
+          style={styles.textInput}
+          placeholder="Enter session id"
+          value={sessionId}
+          onChangeText={setSessionId}
+        />
         <TouchableOpacity style={styles.button} onPress={onAuthClick}>
           <Text style={styles.buttonText}>authorization</Text>
         </TouchableOpacity>

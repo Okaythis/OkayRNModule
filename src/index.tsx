@@ -25,8 +25,8 @@ export function updateDeviceToken(token: string): void {
 export function isEnrolled(): Promise<string> {
   return OkaySdk.isEnrolled().then(console.log).catch(console.error)
 }
-export function linkTenant(code: string): Promise<string> {
-  return OkaySdk.linkTenant(code).then(console.log).catch(console.error)
+export function linkTenant(code: string): Promise<any> {
+  return OkaySdk.linkTenant(code)
 }
 export function unlinkTenant(id: number): Promise<string> {
   return OkaySdk.unlinkTenant(id).then(console.log).catch(console.error)
@@ -34,7 +34,7 @@ export function unlinkTenant(id: number): Promise<string> {
 export function enrollProcedure(): Promise<string> {
   return OkaySdk.enrollProcedure({
     SpaEnrollData: {
-      host: 'https://demostand.okaythis.com',
+      host: 'https://stage.okaythis.com',
       pubPss: pubPssBase64,
       installationId: "9980"
     }

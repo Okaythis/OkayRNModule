@@ -30,7 +30,7 @@ class CustomResourceProvider: ResourceProvider {
     func string(forConfirmActionHeader transactionInfo: TransactionInfo!) -> NSAttributedString! {
         return NSAttributedString.init()
     }
-    
+
     
 }
 
@@ -78,7 +78,7 @@ class OkaySdk: NSObject {
             }
             if try PSA.isReadyForEnrollment() {
                 try PSA.startEnrollment(withHost: host,
-                                    invisibly: true,
+                                    invisibly: false,
                                     installationId: installationId,
                                     resourceProvider: resourceProvider,
                                     pubPssBase64: pubPss) { status in
@@ -102,7 +102,8 @@ class OkaySdk: NSObject {
             try PSA.linkTenant(withLinkingCode: linkingCode, completion: { status, tenant in
                 if status.rawValue == 1 {
                     self.tenantTheme = tenant.theme
-                    resolve(tenant.tenantId)
+                    let response = tenant.dictionaryWithValues(forKeys: ["name", "tenantId", "theme"])
+                    resolve(response)
                 } else {
                     reject("Error", "Failed with code: \(status.rawValue)", nil)
                 }
@@ -142,7 +143,7 @@ class OkaySdk: NSObject {
     func authorization(sessionId: NSNumber, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
         do {
             if PSA.isReadyForAuthorization() {
-                try PSA.startAuthorization(with: tenantTheme, sessionId: sessionId) {isCancelled, status in
+                PSA.startAuthorization(with: PSATheme(), sessionId: sessionId, resourceProvider: nil, loaderViewController: nil) {isCancelled, status, info in
                     if !isCancelled && status.rawValue == 1 {
                         resolve("Success")
                     } else {
