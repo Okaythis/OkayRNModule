@@ -6,7 +6,7 @@ const LINKING_ERROR =
   '- You rebuilt the app after installing the package\n' +
   '- You are not using Expo managed workflow\n';
 
-const OkaySdk = NativeModules.OkaySdk
+export const OkaySdk = NativeModules.OkaySdk
   ? NativeModules.OkaySdk
   : new Proxy(
       {},
@@ -36,7 +36,7 @@ export function enrollProcedure(): Promise<string> {
     SpaEnrollData: {
       host: 'https://demostand.okaythis.com',
       pubPss: pubPssBase64,
-      installationId: "9980"
+      installationId: "9990"
     }
   })
   .then(console.log)
