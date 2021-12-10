@@ -7,46 +7,54 @@
 
 import Foundation
 
-public class OkayResponse: Encodable {
-    func toString() throws -> String {
+public protocol OkayResponse: Encodable {
+    func toString() throws -> String
+}
+
+extension OkayResponse {
+    public func toString() throws -> String {
         let response = try JSONEncoder().encode(self)
         return String(data: response, encoding: .utf8)!
     }
 }
 
-public class OkayEnrollmentResponse: OkayResponse {
+public struct OkayEnrollmentResponse: OkayResponse {
     let enrollmentStatus: Bool
-    init(status: Bool) {
-        enrollmentStatus = status
+    let enrollmentId: String?
+    let externalId: String?
+    init(status: Bool, enrollmentId: String?, externalId: String?) {
+        self.enrollmentStatus = status
+        self.enrollmentId = enrollmentId
+        self.externalId = externalId
     }
 }
 
-public class OkayAuthResponse: OkayResponse {
+public struct OkayAuthResponse: OkayResponse {
     let authSessionStatus: Bool
     init(status: Bool) {
-        authSessionStatus = status
+        self.authSessionStatus = status
     }
 }
 
-public class OkayLinkResponse: OkayResponse {
+public struct OkayLinkResponse: OkayResponse {
     let linkingSuccessStatus: Bool
-    let data: [String : Any]?
-    init(status: Bool, tenantData: [String : Any]?) {
-        linkingSuccessStatus = status
-        data = tenantData
+    let tenantId: Int?
+    init(status: Bool, tenantId: Int?) {
+        self.linkingSuccessStatus = status
+        self.tenantId = tenantId
     }
 }
 
-public class OkayUnLinkResponse: OkayResponse {
+public struct OkayUnLinkResponse: OkayResponse {
     let unlinkingSuccessStatus: Bool
     init(status: Bool) {
-        unlinkingSuccessStatus = status
+        self.unlinkingSuccessStatus = status
     }
 }
 
-public class OkayInitResponse: OkayResponse {
+public struct OkayInitResponse: OkayResponse {
     let initStatus: Bool
     init(status: Bool) {
-        initStatus = status
+        self.initStatus = status
     }
 }

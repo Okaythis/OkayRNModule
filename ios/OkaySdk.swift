@@ -55,6 +55,7 @@ class OkaySdk: NSObject {
         return provider
     }
     
+    
     @objc(initOkay:withResolver:withRejecter:)
     func initOkay(data: NSDictionary, resolve:RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) {
         do {
@@ -110,9 +111,13 @@ class OkaySdk: NSObject {
                                     pubPssBase64: pubPss) { status in
                     do {
                         if status.rawValue == 1 {
-                            try resolve(OkayEnrollmentResponse(status: true).toString())
+                            let enrollmentId = PSACommonData.enrollmentId()
+                            let externalId = PSACommonData.externalId()
+                            let a = OkayEnrollmentResponse(status: true, enrollmentId: enrollmentId, externalId: externalId)
+                            let str = try a.toString()
+                            try resolve(str)
                         } else {
-                            try reject("", OkayEnrollmentResponse(status: false).toString(), nil)
+                            try reject("", OkayEnrollmentResponse(status: false, enrollmentId: nil, externalId: nil).toString(), nil)
                         }
                     } catch {
                         reject("Error", "Failed to enroll", error)
@@ -133,10 +138,10 @@ class OkaySdk: NSObject {
                 do {
                     if status.rawValue == 1 {
                         self.tenantTheme = tenant.theme
-                        let response = tenant.dictionaryWithValues(forKeys: ["name", "tenantId", "theme"])
-                        try resolve(OkayLinkResponse(status: true, tenantData: response).toString())
+                        let id = (tenant.tenantId != nil) ? Int(tenant.tenantId!) : nil
+                        try resolve(OkayLinkResponse(status: true, tenantId: id).toString())
                     } else {
-                        try reject("Error", OkayLinkResponse(status: false, tenantData: nil).toString(), nil)
+                        try reject("Error", OkayLinkResponse(status: false, tenantId: nil).toString(), nil)
                     }
                 } catch {
                     reject("Error", "Failed to link tenant", error)

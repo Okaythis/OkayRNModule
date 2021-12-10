@@ -4,13 +4,6 @@ import { StyleSheet, View, Text, SafeAreaView, TextInput, TouchableOpacity } fro
 import { authorization, enrollProcedure, isEnrolled, isReadyForAuthorization, linkTenant, unlinkTenant, updateDeviceToken } from 'react-native-okay-sdk';
 import messaging from '@react-native-firebase/messaging';
 
-
-interface Tenant {
-  tenantId: number,
-  name: string,
-  theme: any
-}
-
 async function requestUserPermission() {
   const authStatus = await messaging().requestPermission();
   const enabled =
@@ -27,7 +20,7 @@ async function requestUserPermission() {
 export default function App() {
   const [linkingCode, setLinkingCode] = React.useState('');
   const [sessionId, setSessionId] = React.useState('');
-  const [tenant, setTenant] = React.useState<Tenant>({} as Tenant);
+  const [tenantId, setTenantId] = React.useState<number>();
 
   React.useEffect(() => {
     requestUserPermission();
@@ -42,13 +35,18 @@ export default function App() {
   }, []);
 
   const onLinkTenantClick = () => {
-    linkTenant(linkingCode).then((t: Tenant) => {
-      setTenant(t)
+    linkTenant(linkingCode).then((data: string) => {
+      console.log(data);
+      const {linkingSuccessStatus, tenantId} = JSON.parse(data)
+      if(linkingSuccessStatus) {
+        setTenantId(tenantId)
+      }
     })
+    .catch(console.error)
   }
 
   const onUnlinkTenantClick = () => {
-    unlinkTenant(tenant.tenantId)
+    unlinkTenant(tenantId)
   }
 
   const onAuthClick = () => {
@@ -74,11 +72,8 @@ export default function App() {
         style={styles.textInput}
           keyboardType={'numeric'}
           placeholder="Enter tenant ID"
-          value={tenant?.tenantId?.toString() ?? ''}
-          onChangeText={(val) => setTenant(prevState => ({
-            ...prevState,
-            tenantId: +val
-          }))}
+          value={tenantId?.toString() ?? ''}
+          onChangeText={(val) => setTenantId(+val)}
         />
         <TouchableOpacity style={styles.button} onPress={onUnlinkTenantClick}>
           <Text style={styles.buttonText}>Unlink tenant</Text>

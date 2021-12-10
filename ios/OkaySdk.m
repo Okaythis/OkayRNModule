@@ -2,7 +2,7 @@
 
 @interface RCT_EXTERN_MODULE(OkaySdk, NSObject)
 
-RCT_EXTERN_METHOD(multiply:(float)a withB:(float)b
+RCT_EXTERN_METHOD(initOkay:(NSDictionary *)data
                  withResolver:(RCTPromiseResolveBlock)resolve
                  withRejecter:(RCTPromiseRejectBlock)reject)
 

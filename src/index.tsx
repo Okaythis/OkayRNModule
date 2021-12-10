@@ -28,7 +28,7 @@ export function isEnrolled(): Promise<string> {
 export function linkTenant(code: string): Promise<any> {
   return OkaySdk.linkTenant(code)
 }
-export function unlinkTenant(id: number): Promise<string> {
+export function unlinkTenant(id?: number): Promise<string> {
   return OkaySdk.unlinkTenant(id).then(console.log).catch(console.error)
 }
 export function enrollProcedure(): Promise<string> {
@@ -46,5 +46,5 @@ export function isReadyForAuthorization(): Promise<string> {
   return OkaySdk.isReadyForAuthorization().then(console.log).catch(console.error)
 }
 export function authorization(sessionId: number): Promise<string> {
-  return OkaySdk.authorization(sessionId).then(console.log).catch(console.error)
+  return OkaySdk.startAuthorization(sessionId).then(console.log).catch(console.error)
 }
