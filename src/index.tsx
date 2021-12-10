@@ -32,9 +32,9 @@ export function unlinkTenant(id: number): Promise<string> {
   return OkaySdk.unlinkTenant(id).then(console.log).catch(console.error)
 }
 export function enrollProcedure(): Promise<string> {
-  return OkaySdk.enrollProcedure({
+  return OkaySdk.startEnrollment({
     SpaEnrollData: {
-      host: 'https://stage.okaythis.com',
+      host: 'https://epayments.quack.click',
       pubPss: pubPssBase64,
       installationId: "9980"
     }

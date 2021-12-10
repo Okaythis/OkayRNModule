@@ -13,7 +13,7 @@ RCT_EXTERN_METHOD(updateDeviceToken:(NSString *)name
 RCT_EXTERN_METHOD(isEnrolled:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(enrollProcedure:(NSDictionary *)spaEnrollData
+RCT_EXTERN_METHOD(startEnrollment:(NSDictionary *)spaEnrollData
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
@@ -28,7 +28,7 @@ RCT_EXTERN_METHOD(unlinkTenant:(nonnull NSNumber *)tenantId
 RCT_EXTERN_METHOD(isReadyForAuthorization:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(authorization:(nonnull NSNumber *)sessionId
+RCT_EXTERN_METHOD(startAuthorization:(nonnull NSNumber *)sessionId
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 @end
