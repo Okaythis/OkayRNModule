@@ -113,9 +113,7 @@ class OkaySdk: NSObject {
                         if status.rawValue == 1 {
                             let enrollmentId = PSACommonData.enrollmentId()
                             let externalId = PSACommonData.externalId()
-                            let a = OkayEnrollmentResponse(status: true, enrollmentId: enrollmentId, externalId: externalId)
-                            let str = try a.toString()
-                            try resolve(str)
+                            try resolve(OkayEnrollmentResponse(status: true, enrollmentId: enrollmentId, externalId: externalId).toString())
                         } else {
                             try reject("", OkayEnrollmentResponse(status: false, enrollmentId: nil, externalId: nil).toString(), nil)
                         }
