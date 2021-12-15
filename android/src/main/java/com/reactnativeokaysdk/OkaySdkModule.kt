@@ -11,7 +11,6 @@ import com.itransition.protectoria.psa_multitenant.protocol.scenarios.linking.Li
 import com.itransition.protectoria.psa_multitenant.protocol.scenarios.unlinking.UnlinkingScenarioListener
 import com.itransition.protectoria.psa_multitenant.restapi.GatewayRestServer
 import com.itransition.protectoria.psa_multitenant.state.ApplicationState
-import com.okaythis.fluttercommunicationchannel.fcc.FccApiImpl
 import com.protectoria.psa.PsaManager
 import com.protectoria.psa.api.PsaConstants
 import com.protectoria.psa.api.converters.PsaIntentUtils
@@ -23,7 +22,6 @@ import com.protectoria.psa.dex.common.ui.PageTheme
 import com.protectoria.psa.dex.design.DefaultPageTheme
 import com.protectoria.psa.dex.ui.texts.TransactionResourceProvider
 import com.protectoria.psa.scenarios.enroll.EnrollResultListener
-import com.protectoria.psa.ui.activities.authorization.AuthorizationActivity
 import com.reactnativeokaysdk.data.NativeResponse
 import com.reactnativeokaysdk.logger.OkayRNExceptionLogger
 import com.reactnativeokaysdk.resourceprovider.OkayResourceProvider
@@ -41,17 +39,17 @@ class OkaySdkModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
 
 
   override fun getName(): String {
-    return "RNOkaySdk"
+    return "OkaySdk"
   }
 
   // Example method
   // See https://reactnative.dev/docs/native-modules-android
 
   private val mActivityEventListener: ActivityEventListener = object : BaseActivityEventListener() {
-    override fun onActivityResult(activity: Activity?, requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(activity: Activity?, requestCode: Int, resultCode: Int, data: Intent?) {
       if (requestCode == PsaConstants.ACTIVITY_REQUEST_CODE_PSA_ENROLL) {
         if (resultCode == AppCompatActivity.RESULT_OK) {
-          data.run {
+          data?.run {
             val resultData = PsaIntentUtils.enrollResultFromIntent(this)
             resultData.let {
               mSpaStorage.putEnrollmentId(it.enrollmentId)
@@ -64,7 +62,7 @@ class OkaySdkModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
             }
           }
         } else {
-          mPickerPromise?.reject(Json.encodeToString(NativeResponse(mapOf(
+          mPickerPromise?.reject("", Json.encodeToString(NativeResponse(mapOf(
             "enrolmentStatus" to false, "enrolmentId" to "",
             "externalId" to ""
           ))))
@@ -77,27 +75,11 @@ class OkaySdkModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
             "authSessionStatus" to true
           ))))
         } else {
-          mPickerPromise?.reject(Json.encodeToString(NativeResponse(mapOf(
+          mPickerPromise?.reject("", Json.encodeToString(NativeResponse(mapOf(
             "authSessionStatus" to false
           ))))
         }
       }
-
-      /*      if (requestCode == PsaConstants.ACTIVITY_REQUEST_CODE_PSA_ENROLL) {
-          if (resultCode == Activity.RESULT_OK) {
-            mPickerPromise!!.resolve(parseEnrollmentData(data))
-          } else {
-            mPickerPromise!!.reject("" , resultCode.toString())
-          }
-        }
-        if (requestCode == PsaConstants.ACTIVITY_REQUEST_CODE_PSA_AUTHORIZATION) {
-          if (resultCode == Activity.RESULT_OK
-            || resultCode == AuthorizationActivity.RESULT_OK_CONSUMED_PUSH) {
-            mPickerPromise!!.resolve(resultCode)
-          } else {
-            mPickerPromise!!.reject("" , resultCode.toString())
-          }
-        }*/
     }
   }
 
@@ -109,7 +91,7 @@ class OkaySdkModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
     }
 
     override fun onLinkingFailed(applicationState: ApplicationState) {
-      mPickerPromise!!.reject(Json.encodeToString(NativeResponse(mapOf(
+      mPickerPromise!!.reject("", Json.encodeToString(NativeResponse(mapOf(
         "linkingSuccessStatus" to false, "error" to applicationState.toString()
       ))))
     }
@@ -186,7 +168,6 @@ class OkaySdkModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
     } else {
       psaManager = PsaManager.init(reactContext, OkayRNExceptionLogger(), TransactionResourceProvider(reactContext))
     }
-//    PsaManager.getInstance().setFccApi(FccApiImpl.INSTANCE)
 
     if (!okayUrlEndpoint.isNullOrEmpty()) {
       psaManager!!.setPssAddress(okayUrlEndpoint)
@@ -228,37 +209,37 @@ class OkaySdkModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
           null,
           psaType
         ), object : EnrollResultListener {
-        override fun onEnrollResult(p0: Int, data: Intent?) {
-          data.apply {
-            if (this == null) {
-              promise.reject("", Json.encodeToString(NativeResponse(mapOf(
-                "enrolmentStatus" to false, "enrolmentId" to "",
-                "externalId" to ""
-              ))))
-              return@apply
-            }
-
-
-            val resultData = PsaIntentUtils.enrollResultFromIntent(this)
-            resultData.let {
-              if (it == null) {
+          override fun onEnrollResult(p0: Int, data: Intent?) {
+            data.apply {
+              if (this == null) {
                 promise.reject("", Json.encodeToString(NativeResponse(mapOf(
                   "enrolmentStatus" to false, "enrolmentId" to "",
                   "externalId" to ""
                 ))))
                 return@apply
               }
-              mSpaStorage.putEnrollmentId(it.enrollmentId)
-              mSpaStorage.putExternalId(it.externalId)
-              promise.resolve(Json.encodeToString(NativeResponse(mapOf(
-                "enrolmentId" to it.enrollmentId,
-                "externalId" to it.externalId,
-                "enrolmentStatus" to true
-              ))))
+
+
+              val resultData = PsaIntentUtils.enrollResultFromIntent(this)
+              resultData.let {
+                if (it == null) {
+                  promise.reject("", Json.encodeToString(NativeResponse(mapOf(
+                    "enrolmentStatus" to false, "enrolmentId" to "",
+                    "externalId" to ""
+                  ))))
+                  return@apply
+                }
+                mSpaStorage.putEnrollmentId(it.enrollmentId)
+                mSpaStorage.putExternalId(it.externalId)
+                promise.resolve(Json.encodeToString(NativeResponse(mapOf(
+                  "enrolmentId" to it.enrollmentId,
+                  "externalId" to it.externalId,
+                  "enrolmentStatus" to true
+                ))))
+              }
             }
           }
-        }
-      }, reactContext
+        }, reactContext
       )
       return
     }
@@ -362,7 +343,7 @@ class OkaySdkModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
     try {
       pageTheme = mapper.convertValue(toMap(pageThemeMap), PageTheme::class.java)
     } catch (e: Exception) {
-      promise.reject("Invalid object property")
+      promise.reject("", "Invalid object property")
     }
     return pageTheme
   }
@@ -412,4 +393,3 @@ class OkaySdkModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
     return resources.getIdentifier(id, "drawable", reactContext!!.packageName)
   }
 }
-
