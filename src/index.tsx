@@ -33,6 +33,7 @@ export function updateDeviceToken(token: string): void {
 export function isEnrolled(): Promise<string> {
   return OkaySdk.isEnrolled().then(console.log).catch(console.error);
 }
+
 export function linkTenant(code: string): Promise<string> {
   return OkaySdk.linkTenant(code).then(console.log).catch(console.error);
 }
@@ -40,9 +41,9 @@ export function unlinkTenant(id: number): Promise<string> {
   return OkaySdk.unlinkTenant(id).then(console.log).catch(console.error);
 }
 export function enrollProcedure(): Promise<string> {
-  return OkaySdk.enrollProcedure({
+  return OkaySdk.startEnrollment({
     SpaEnrollData: {
-      host: 'https://demostand.okaythis.com',
+      host: 'https://epayments.quack.click',
       pubPss: pubPssBase64,
       installationId: '9990',
     },
