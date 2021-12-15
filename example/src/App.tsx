@@ -2,6 +2,9 @@ import * as React from 'react';
 
 import { StyleSheet, View, Text, SafeAreaView, TextInput, TouchableOpacity } from 'react-native';
 import { authorization, enrollProcedure, isEnrolled, isReadyForAuthorization, linkTenant, unlinkTenant, updateDeviceToken } from 'react-native-okay-sdk';
+
+import PushNotificationIOS from '@react-native-community/push-notification-ios';
+
 import messaging from '@react-native-firebase/messaging';
 
 async function requestUserPermission() {
@@ -16,6 +19,7 @@ async function requestUserPermission() {
     })
   }
 }
+
 
 export default function App() {
   const [linkingCode, setLinkingCode] = React.useState('');
