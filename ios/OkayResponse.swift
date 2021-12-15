@@ -1,5 +1,5 @@
 //
-//  PSAResponse.swift
+//  OkayResponse.swift
 //  react-native-okay-sdk
 //
 //  Created by e.brusnev on 12/10/21.
