@@ -40,7 +40,7 @@ export function linkTenant(code: string): Promise<string> {
 export function unlinkTenant(id: number): Promise<string> {
   return OkaySdk.unlinkTenant(id).then(console.log).catch(console.error);
 }
-export function enrollProcedure(): Promise<string> {
+export function startEnrollment(): Promise<string> {
   return OkaySdk.startEnrollment({
     SpaEnrollData: {
       host: 'https://epayments.quack.click',
@@ -56,8 +56,8 @@ export function isReadyForAuthorization(): Promise<string> {
     .then(console.log)
     .catch(console.error);
 }
-export function authorization(sessionId: number): Promise<string> {
-  return OkaySdk.authorization(sessionId)
+export function startAuthorization(sessionId: number): Promise<string> {
+  return OkaySdk.startAuthorization(sessionId)
     .then(console.log)
     .catch(console.error);
 }

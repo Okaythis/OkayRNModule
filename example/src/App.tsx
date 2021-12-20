@@ -1,9 +1,7 @@
 import * as React from 'react';
 
 import { StyleSheet, View, Text, SafeAreaView, TextInput, TouchableOpacity } from 'react-native';
-import { authorization, enrollProcedure, isEnrolled, isReadyForAuthorization, linkTenant, unlinkTenant, updateDeviceToken } from 'react-native-okay-sdk';
-
-import PushNotificationIOS from '@react-native-community/push-notification-ios';
+import { startAuthorization, startEnrollment, isEnrolled, isReadyForAuthorization, linkTenant, unlinkTenant, updateDeviceToken } from 'react-native-okay-sdk';
 
 import messaging from '@react-native-firebase/messaging';
 
@@ -19,7 +17,6 @@ async function requestUserPermission() {
     })
   }
 }
-
 
 export default function App() {
   const [linkingCode, setLinkingCode] = React.useState('');
@@ -50,17 +47,19 @@ export default function App() {
   }
 
   const onUnlinkTenantClick = () => {
-    unlinkTenant(tenantId)
+    if(tenantId) {
+      unlinkTenant(tenantId)
+    }
   }
 
   const onAuthClick = () => {
-    authorization(Number(sessionId));
+    startAuthorization(Number(sessionId));
   }
 
   return (
     <SafeAreaView>
       <View style={styles.container}>
-        <TouchableOpacity style={styles.button} onPress={enrollProcedure}>
+        <TouchableOpacity style={styles.button} onPress={startEnrollment}>
           <Text style={styles.buttonText}>Enroll device</Text>
         </TouchableOpacity>
         <TextInput
