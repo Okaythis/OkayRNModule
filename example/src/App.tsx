@@ -16,6 +16,7 @@ async function requestUserPermission() {
   if (enabled) {
     console.log('Authorization status:', authStatus);
     messaging().getToken().then(token => {
+      console.log('token: ', token);
       updateDeviceToken(token || '');
     })
   }
@@ -39,7 +40,7 @@ export default function App() {
   }, []);
 
   const onLinkTenantClick = () => {
-    linkTenant(linkingCode).then((data: string) => {
+    linkTenant(linkingCode, {}).then((data: string) => {
       console.log(data);
       const {linkingSuccessStatus, tenantId} = JSON.parse(data)
       if(linkingSuccessStatus) {
