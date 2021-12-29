@@ -1,11 +1,12 @@
 import * as React from 'react';
 
 import { StyleSheet, View, Text, SafeAreaView, TextInput, TouchableOpacity } from 'react-native';
-import { authorization, enrollProcedure, isEnrolled, isReadyForAuthorization, linkTenant, unlinkTenant, updateDeviceToken } from 'react-native-okay-sdk';
-
-import PushNotificationIOS from '@react-native-community/push-notification-ios';
+import { startAuthorization, startEnrollment, isEnrolled, isReadyForAuthorization, linkTenant, unlinkTenant, updateDeviceToken } from 'react-native-okay-sdk';
 
 import messaging from '@react-native-firebase/messaging';
+
+const pubPssBase64 =
+  'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxgyacF1NNWTA6rzCrtK60se9fVpTPe3HiDjHB7MybJvNdJZIgZbE9k3gQ6cdEYgTOSG823hkJCVHZrcf0/AK7G8Xf/rjhWxccOEXFTg4TQwmhbwys+sY/DmGR8nytlNVbha1DV/qOGcqAkmn9SrqW76KK+EdQFpbiOzw7RRWZuizwY3BqRfQRokr0UBJrJrizbT9ZxiVqGBwUDBQrSpsj3RUuoj90py1E88ExyaHui+jbXNITaPBUFJjbas5OOnSLVz6GrBPOD+x0HozAoYuBdoztPRxpjoNIYvgJ72wZ3kOAVPAFb48UROL7sqK2P/jwhdd02p/MDBZpMl/+BG+qQIDAQAB';
 
 async function requestUserPermission() {
   const authStatus = await messaging().requestPermission();
@@ -15,11 +16,11 @@ async function requestUserPermission() {
   if (enabled) {
     console.log('Authorization status:', authStatus);
     messaging().getToken().then(token => {
+      console.log('token: ', token);
       updateDeviceToken(token || '');
     })
   }
 }
-
 
 export default function App() {
   const [linkingCode, setLinkingCode] = React.useState('');
@@ -39,7 +40,7 @@ export default function App() {
   }, []);
 
   const onLinkTenantClick = () => {
-    linkTenant(linkingCode).then((data: string) => {
+    linkTenant(linkingCode, {}).then((data: string) => {
       console.log(data);
       const {linkingSuccessStatus, tenantId} = JSON.parse(data)
       if(linkingSuccessStatus) {
@@ -50,17 +51,29 @@ export default function App() {
   }
 
   const onUnlinkTenantClick = () => {
-    unlinkTenant(tenantId)
+    if(tenantId) {
+      unlinkTenant(tenantId)
+    }
   }
 
   const onAuthClick = () => {
-    authorization(Number(sessionId));
+    startAuthorization(Number(sessionId));
+  }
+
+  const onEnrollClick = () => {
+    startEnrollment({
+      SpaEnrollData: {
+        host: 'https://epayments.quack.click',
+        pubPss: pubPssBase64,
+        installationId: '9990',
+      },
+    })
   }
 
   return (
     <SafeAreaView>
       <View style={styles.container}>
-        <TouchableOpacity style={styles.button} onPress={enrollProcedure}>
+        <TouchableOpacity style={styles.button} onPress={onEnrollClick}>
           <Text style={styles.buttonText}>Enroll device</Text>
         </TouchableOpacity>
         <TextInput

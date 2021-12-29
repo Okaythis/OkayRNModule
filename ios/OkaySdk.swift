@@ -95,10 +95,10 @@ class OkaySdk: NSObject {
     @objc(startEnrollment:withResolver:withRejecter:)
     func startEnrollment(spaEnrollData: NSDictionary, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
         do {
-            guard let enrollData = spaEnrollData["SpaEnrollData"] as? [String: String],
-                let host = enrollData["host"],
-                let pubPss = enrollData["pubPss"],
-                let installationId = enrollData["installationId"]
+            guard let enrollData = spaEnrollData["SpaEnrollData"] as? [String: Any],
+                let host = enrollData["host"] as? String,
+                let pubPss = enrollData["pubPss"] as? String,
+                let installationId = enrollData["installationId"] as? String
             else {
                 reject("Error", "Wrong data passed", nil)
                 return
@@ -129,8 +129,8 @@ class OkaySdk: NSObject {
         }
     }
 
-    @objc(linkTenant:withResolver:withRejecter:)
-    func linkTenant(linkingCode: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
+    @objc(linkTenant:spaStorageData:withResolver:withRejecter:)
+    func linkTenant(linkingCode: String, _spaStorageData: NSDictionary, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
         do {
             try PSA.linkTenant(withLinkingCode: linkingCode, completion: { status, tenant in
                 do {
@@ -150,18 +150,22 @@ class OkaySdk: NSObject {
         }
     }
 
-    @objc(unlinkTenant:withResolver:withRejecter:)
-    func unlinkTenant(tenantId: NSNumber, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
+    @objc(unlinkTenant:spaStorageData:withResolver:withRejecter:)
+    func unlinkTenant(tenantId: NSNumber, _spaStorageData: NSDictionary, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
         do {
-            PSA.unlinkTenant(withTenantId: tenantId) { status, id in
-                if status.rawValue == 1 {
-                    resolve("Success")
-                } else {
-                    reject("Error", "Failed with code: \(status.rawValue)", nil)
+            try PSA.unlinkTenant(withTenantId: tenantId) { status, id in
+                do {
+                    if status.rawValue == 1 {
+                        try resolve(OkayUnLinkResponse(status: true).toString())
+                    } else {
+                        try reject("Error", OkayUnLinkResponse(status: false).toString(), nil)
+                    }
+                } catch {
+                    reject("Error", "Failed to unlink tenant", error)
                 }
             }
         } catch {
-            reject("Error", "Failed to link tenant", error)
+            reject("Error", "Failed to unlink tenant", error)
         }
     }
 
@@ -176,9 +180,15 @@ class OkaySdk: NSObject {
     }
 
     @objc(startAuthorization:withResolver:withRejecter:)
-    func startAuthorization(sessionId: NSNumber, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
+    func startAuthorization(data: NSDictionary, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
         do {
             if PSA.isReadyForAuthorization() {
+                guard let authData = data["SpaAuthorizationData"] as? [String: Any],
+                    let sessionId = authData["sessionId"] as? NSNumber
+                else {
+                    reject("Error", "Wrong data passed", nil)
+                    return
+                }
                 PSA.startAuthorization(with: tenantTheme, sessionId: sessionId, resourceProvider: self.resourceProvider, loaderViewController: nil) {isCancelled, status, info in
                     do {
                         if !isCancelled && status.rawValue == 1 {

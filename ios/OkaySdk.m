@@ -18,17 +18,19 @@ RCT_EXTERN_METHOD(startEnrollment:(NSDictionary *)spaEnrollData
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(linkTenant:(NSString *)linkingCode
+                  spaStorageData:(NSDictionary *)spaStorageData
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(unlinkTenant:(nonnull NSNumber *)tenantId
+                  spaStorageData:(NSDictionary *)spaStorageData
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(isReadyForAuthorization:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(startAuthorization:(nonnull NSNumber *)sessionId
+RCT_EXTERN_METHOD(startAuthorization:(NSDictionary *)spaAuthData
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 @end
