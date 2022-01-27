@@ -268,7 +268,7 @@ class OkaySdkModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
       val pageTheme = initPageTheme(pageThemeMap, promise)
       SpaAuthorizationData(sessionId.toLong(), appPNS, pageTheme, psaType)
     } else {
-      SpaAuthorizationData(sessionId.toLong(), appPNS, DefaultPageTheme.getDefaultPageTheme(reactContext), psaType)
+      SpaAuthorizationData(sessionId.toLong(), appPNS, null, psaType)
     }
     PsaManager.startAuthorizationActivity(activity, authorizationData)
   }
