@@ -174,16 +174,16 @@ We will need to update Okay with the push notification token generated for iOS d
 ```javascript
 // We can update iOS PNS token in this lifecycle method here
 
-// If you are APNS you code will look similar to this
-  PushNotificationIOS.addEventListener('register', token => {
+// If your are using APNS, your code will look similar to the following
+PushNotificationIOS.addEventListener('register', token => {
     RNOkaySdk.updateDeviceToken(token);
-    });
+});
 
 // If you are using Firebase your code will look similar to this
-    messaging().getToken().then(token => {
-      console.log('token: ', token);
-      OkaySdk.updateDeviceToken(token || '');
-    })
+messaging().getToken().then(token => {
+    console.log('token: ', token);
+    OkaySdk.updateDeviceToken(token || '');
+})
 
 ```
 
@@ -191,10 +191,9 @@ We will need to update Okay with the push notification token generated for iOS d
 If the required permissiosn have been granted on the device, we can now proceed to enrolling the user. Okay SDK provides the *startEnrollment(enrollData: any)* method which takes a Json with "SpaEnrollData" as key.
 
 ```javascript
-    firebase.iid().getToken()
-      .then(token => {
-        RNOkaySdk.startEnrollment({
-          SpaEnrollData: {
+messaging().getToken().then(token => {
+    RNOkaySdk.startEnrollment({
+        SpaEnrollData: {
             host: "https://demostand.okaythis.com/", // Okay server address
             appPns: token,
             pubPss: pubPssBase64,
@@ -208,8 +207,7 @@ If the required permissiosn have been granted on the device, we can now proceed 
             }
           }
         }).then(response => console.log(response));
-      })
-      .catch(error => console.log(error));
+    })
 ```
 SpaEnrollData contains several keys that are required for a secure communication with Okay servers.
 
@@ -252,8 +250,7 @@ messaging().getToken().then(token => {
 If a user was successfully linked to a tenant and you now wish to unlink that user from your tenant on the Okay secure server, you can use the *unlinkTenant(tenantId, SpaStorage)* method to do this as shown below.
 
 ```javascript
-
-    messaging().getToken().then(token => {
+messaging().getToken().then(token => {
     RNOkaySdk.unlinkTenant(
         tenantId,
         {
