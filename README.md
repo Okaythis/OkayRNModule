@@ -139,7 +139,7 @@ We will need to call the initOkay(object) on the SDK to properly initialize the 
 ```javascript
   OkaySdk.initOkay({
     initData: {
-      okayUrlEndpoint: 'https://stage.okaythis.com',
+      okayUrlEndpoint: 'https://demostand.okaythis.com',
     },
   })
 ```
