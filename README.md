@@ -137,7 +137,6 @@ Please visit this link to enable Push Notification for iOS devices when using Re
 We will need to call the initOkay(object) on the SDK to properly initialize the Okay SDK. For example we pass in 'https://demostand.okaythis.com/' as our Okay server endpoint.
 
 ```javascript
-
   OkaySdk.initOkay({
     initData: {
       okayUrlEndpoint: 'https://stage.okaythis.com',
