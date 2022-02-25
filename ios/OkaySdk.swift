@@ -37,18 +37,19 @@ class OkaySdk: NSObject {
 
     var tenantTheme: PSATheme?
     var resourceProvider: OkayResourceProvider = OkayResourceProvider()
+    var okayUrlEndpoint: String?
     
     internal func initResourceProvider(data: [String: String]) -> OkayResourceProvider {
         let provider = OkayResourceProvider()
-        data["biometricAlertReasonText"].map { text in provider.biometricAlertReasonText = NSAttributedString(string: text)}
+        data["iosBiometricAlertReasonText"].map { text in provider.biometricAlertReasonText = NSAttributedString(string: text)}
         data["confirmButtonText"].map { text in provider.confirmButtonText = NSAttributedString(string: text)}
-        data["confirmBiometricTouchButtonText"].map { text in provider.confirmBiometricTouchButtonText = NSAttributedString(string: text)}
-        data["confirmBiometricFaceButtonText"].map { text in provider.confirmBiometricFaceButtonText = NSAttributedString(string: text)}
+        data["iosConfirmBiometricTouchButtonText"].map { text in provider.confirmBiometricTouchButtonText = NSAttributedString(string: text)}
+        data["iosConfirmBiometricFaceButtonText"].map { text in provider.confirmBiometricFaceButtonText = NSAttributedString(string: text)}
         data["cancelButtonText"].map { text in provider.cancelButtonText = NSAttributedString(string: text)}
         data["massPaymentDetailsButtonText"].map { text in provider.massPaymentDetailsButtonText = NSAttributedString(string: text)}
-        data["massPaymentDetailsHeaderText"].map { text in provider.massPaymentDetailsHeaderText = NSAttributedString(string: text)}
+        data["iosMassPaymentDetailsHeaderText"].map { text in provider.massPaymentDetailsHeaderText = NSAttributedString(string: text)}
         data["feeLabelText"].map { text in provider.feeLabelText = NSAttributedString(string: text)}
-        data["recepientLabelText"].map { text in provider.recepientLabelText = NSAttributedString(string: text)}
+        data["recipientLabelText"].map { text in provider.recepientLabelText = NSAttributedString(string: text)}
         data["enrollmentTitleText"].map { text in provider.enrollmentTitleText = NSAttributedString(string: text)}
         data["enrollmentDescriptionText"].map { text in provider.enrollmentDescriptionText = NSAttributedString(string: text)}
         
@@ -60,11 +61,13 @@ class OkaySdk: NSObject {
     func initOkay(data: NSDictionary, resolve:RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) {
         do {
             guard let initData = data["initData"] as? [String: Any?],
+                  let okayUrlEndpoint = initData["okayUrlEndpoint"] as? String,
                   let resourceDataMap = initData["resourceProvider"] as? [String: String]
             else {
                 try resolve(OkayInitResponse(status: false).toString());
                 return;
             }
+            self.okayUrlEndpoint = okayUrlEndpoint
             self.resourceProvider = initResourceProvider(data: resourceDataMap)
             try resolve(OkayInitResponse(status: true).toString())
         } catch {
@@ -96,7 +99,6 @@ class OkaySdk: NSObject {
     func startEnrollment(spaEnrollData: NSDictionary, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
         do {
             guard let enrollData = spaEnrollData["SpaEnrollData"] as? [String: Any],
-                let host = enrollData["host"] as? String,
                 let pubPss = enrollData["pubPss"] as? String,
                 let installationId = enrollData["installationId"] as? String
             else {
@@ -104,21 +106,25 @@ class OkaySdk: NSObject {
                 return
             }
             if try PSA.isReadyForEnrollment() {
-                try PSA.startEnrollment(withHost: host,
-                                    invisibly: false,
-                                    installationId: installationId,
-                                    resourceProvider: self.resourceProvider,
-                                    pubPssBase64: pubPss) { status in
-                    do {
-                        if status.rawValue == 1 {
-                            let enrollmentId = PSACommonData.enrollmentId()
-                            let externalId = PSACommonData.externalId()
-                            try resolve(OkayEnrollmentResponse(status: true, enrollmentId: enrollmentId, externalId: externalId).toString())
-                        } else {
-                            try reject("", OkayEnrollmentResponse(status: false, enrollmentId: nil, externalId: nil).toString(), nil)
+                if (self.okayUrlEndpoint == nil) {
+                    reject("Error", "Okay Url enpoint is not defined", nil)
+                } else {
+                    try PSA.startEnrollment(withHost: self.okayUrlEndpoint,
+                                        invisibly: false,
+                                        installationId: installationId,
+                                        resourceProvider: self.resourceProvider,
+                                        pubPssBase64: pubPss) { status in
+                        do {
+                            if status.rawValue == 1 {
+                                let enrollmentId = PSACommonData.enrollmentId()
+                                let externalId = PSACommonData.externalId()
+                                try resolve(OkayEnrollmentResponse(status: true, enrollmentId: enrollmentId, externalId: externalId).toString())
+                            } else {
+                                try reject("", OkayEnrollmentResponse(status: false, enrollmentId: nil, externalId: nil).toString(), nil)
+                            }
+                        } catch {
+                            reject("Error", "Failed to enroll", error)
                         }
-                    } catch {
-                        reject("Error", "Failed to enroll", error)
                     }
                 }
             } else {

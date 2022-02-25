@@ -105,31 +105,31 @@ class OkayResourceProvider(
 
     companion object {
         const val BiometricPromptCancelButton =
-            "provideTextForBiometricPromptCancelButton";
+            "cancelButtonText";
         const val EnrollmentDescription =
-            "provideTextForEnrollmentDescription";
+            "enrollmentDescriptionText";
         const val ScreenshotsNotificationIconId =
-            "provideScreenshotsNotificationIconId";
-        const val Fee = "provideTextForFee";
-        const val ScreenshotsChannelName = "provideScreenshotsChannelName";
-        const val TransactionDetails = "provideTextForTransactionDetails";
+            "androidScreenhotsNotificationIconId";
+        const val Fee = "feeLabelText";
+        const val ScreenshotsChannelName = "androidScreenshotsChannelName";
+        const val TransactionDetails = "androidTransactionDetails";
         const val BiometricPromptSubTitle =
-            "provideTextForBiometricPromptSubTitle";
-        const val Recipient = "provideTextForRecipient";
-        const val EnrollmentTitle = "provideTextForEnrollmentTitle";
-        const val ConfirmButton = "provideTextForConfirmButton";
+            "androidBiometricPromptSubTitle";
+        const val Recipient = "recipientLabelText";
+        const val EnrollmentTitle = "enrollmentTitleText";
+        const val ConfirmButton = "confirmButtonText";
         const val BiometricPromptDescription =
-            "provideTextForBiometricPromptDescription";
+            "androidBiometricPromptDescription";
         const val ScreenshotsNotificationText =
-            "provideScreenshotsNotificationText";
-        const val AuthScreenTitle = "provideTextForAuthScreenTitle";
+            "androidScreenshotsNotificationText";
+        const val AuthScreenTitle = "androidAuthScreenTitle";
         const val BiometricPromptTitle =
-            "provideTextForBiometricPromptTitle";
+            "androidBiometricPromptTitle";
         const val ConfirmBiometricButton =
-            "provideTextForConfirmBiometricButton";
+            "androidConfirmBiometricButtonText";
         const val PaymentDetailsButton =
-            "provideTextForPaymentDetailsButton";
+            "massPaymentDetailsButtonText";
         const val AuthorizationProgressView =
-            "provideTextForAuthorizationProgressView";
+            "androidAuthorizationProgressViewText";
     }
 }
