@@ -3,6 +3,8 @@ package com.reactnativeokaysdk
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
+import android.os.Handler
+import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import com.facebook.react.bridge.*
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -11,6 +13,11 @@ import com.itransition.protectoria.psa_multitenant.protocol.scenarios.linking.Li
 import com.itransition.protectoria.psa_multitenant.protocol.scenarios.unlinking.UnlinkingScenarioListener
 import com.itransition.protectoria.psa_multitenant.restapi.GatewayRestServer
 import com.itransition.protectoria.psa_multitenant.state.ApplicationState
+import com.okaythis.fccabstractcore.interfaces.data.AbstractFccData
+import com.okaythis.fccabstractcore.interfaces.data.AbstractFlutterEngineDependency
+import com.okaythis.fccabstractcore.interfaces.fcc.FccApi
+import com.okaythis.fccabstractcore.interfaces.parcel.Parcel
+import com.okaythis.fluttercommunicationchannel.fcc.FccApiImpl
 import com.protectoria.psa.PsaManager
 import com.protectoria.psa.api.PsaConstants
 import com.protectoria.psa.api.converters.PsaIntentUtils
@@ -19,7 +26,6 @@ import com.protectoria.psa.api.entities.SpaEnrollData
 import com.protectoria.psa.dex.common.data.enums.PsaType
 import com.protectoria.psa.dex.common.data.json.PsaGsonFactory
 import com.protectoria.psa.dex.common.ui.PageTheme
-import com.protectoria.psa.dex.design.DefaultPageTheme
 import com.protectoria.psa.dex.ui.texts.TransactionResourceProvider
 import com.protectoria.psa.scenarios.enroll.EnrollResultListener
 import com.reactnativeokaysdk.logger.OkayRNExceptionLogger
@@ -29,7 +35,8 @@ import kotlinx.serialization.json.*
 import org.json.JSONObject
 
 
-class OkaySdkModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
+class OkaySdkModule(reactContext: ReactApplicationContext) :
+  ReactContextBaseJavaModule(reactContext) {
 
   private var reactContext: ReactApplicationContext? = null
   private var psaManager: PsaManager? = null
@@ -45,7 +52,12 @@ class OkaySdkModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
   // See https://reactnative.dev/docs/native-modules-android
 
   private val mActivityEventListener: ActivityEventListener = object : BaseActivityEventListener() {
-    override fun onActivityResult(activity: Activity?, requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(
+      activity: Activity?,
+      requestCode: Int,
+      resultCode: Int,
+      data: Intent?
+    ) {
       if (requestCode == PsaConstants.ACTIVITY_REQUEST_CODE_PSA_ENROLL) {
         if (resultCode == AppCompatActivity.RESULT_OK) {
           data?.run {
@@ -53,30 +65,46 @@ class OkaySdkModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
             resultData.let {
               mSpaStorage.putEnrollmentId(it.enrollmentId)
               mSpaStorage.putExternalId(it.externalId)
-              mPickerPromise?.resolve(JSONObject(mapOf(
-                "enrolmentId" to it.enrollmentId,
-                "externalId" to it.externalId,
-                "enrolmentStatus" to true
-              )).toString())
+              mPickerPromise?.resolve(
+                JSONObject(
+                  mapOf(
+                    "enrolmentId" to it.enrollmentId,
+                    "externalId" to it.externalId,
+                    "enrolmentStatus" to true
+                  )
+                ).toString()
+              )
             }
           }
         } else {
-          mPickerPromise?.reject("", JSONObject(mapOf(
-            "enrolmentStatus" to false, "enrolmentId" to "",
-            "externalId" to ""
-          )).toString())
+          mPickerPromise?.reject(
+            "", JSONObject(
+              mapOf(
+                "enrolmentStatus" to false, "enrolmentId" to "",
+                "externalId" to ""
+              )
+            ).toString()
+          )
         }
       }
 
       if (requestCode == PsaConstants.ACTIVITY_REQUEST_CODE_PSA_AUTHORIZATION) {
         if (resultCode == AppCompatActivity.RESULT_OK) {
-          mPickerPromise?.resolve(JSONObject(mapOf(
-            "authSessionStatus" to true
-          )).toString())
+          mPickerPromise?.resolve(
+            JSONObject(
+              mapOf(
+                "authSessionStatus" to true
+              )
+            ).toString()
+          )
         } else {
-          mPickerPromise?.reject("", JSONObject(mapOf(
-            "authSessionStatus" to false
-          )).toString())
+          mPickerPromise?.reject(
+            "", JSONObject(
+              mapOf(
+                "authSessionStatus" to false
+              )
+            ).toString()
+          )
         }
       }
     }
@@ -84,31 +112,48 @@ class OkaySdkModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
 
   private val mLinkingScenarioListener: LinkingScenarioListener = object : LinkingScenarioListener {
     override fun onLinkingCompletedSuccessful(l: Long, s: String) {
-      mPickerPromise!!.resolve(JSONObject(mapOf(
-        "linkingSuccessStatus" to true
-      )).toString())
+      mPickerPromise!!.resolve(
+        JSONObject(
+          mapOf(
+            "linkingSuccessStatus" to true
+          )
+        ).toString()
+      )
     }
 
     override fun onLinkingFailed(applicationState: ApplicationState) {
-      mPickerPromise!!.reject("", JSONObject(mapOf(
-        "linkingSuccessStatus" to false, "error" to applicationState.toString()
-      )).toString())
+      mPickerPromise!!.reject(
+        "", JSONObject(
+          mapOf(
+            "linkingSuccessStatus" to false, "error" to applicationState.toString()
+          )
+        ).toString()
+      )
     }
   }
 
-  private val mUnlinkingScenarioListener: UnlinkingScenarioListener = object : UnlinkingScenarioListener {
-    override fun onUnlinkingCompletedSuccessful() {
-      mPickerPromise!!.resolve(JSONObject(mapOf(
-        "unlinkingSuccessStatus" to true
-      )).toString())
-    }
+  private val mUnlinkingScenarioListener: UnlinkingScenarioListener =
+    object : UnlinkingScenarioListener {
+      override fun onUnlinkingCompletedSuccessful() {
+        mPickerPromise!!.resolve(
+          JSONObject(
+            mapOf(
+              "unlinkingSuccessStatus" to true
+            )
+          ).toString()
+        )
+      }
 
-    override fun onUnlinkingFailed(applicationState: ApplicationState) {
-      mPickerPromise!!.resolve(JSONObject(mapOf(
-        "unlinkingSuccessStatus" to false, "error" to applicationState.toString()
-      )).toString())
+      override fun onUnlinkingFailed(applicationState: ApplicationState) {
+        mPickerPromise!!.resolve(
+          JSONObject(
+            mapOf(
+              "unlinkingSuccessStatus" to false, "error" to applicationState.toString()
+            )
+          ).toString()
+        )
+      }
     }
-  }
 
   init {
     this.reactContext = reactContext
@@ -165,24 +210,41 @@ class OkaySdkModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
       )
       psaManager = PsaManager.init(reactContext, OkayRNExceptionLogger(), resourceProvider)
     } else {
-      psaManager = PsaManager.init(reactContext, OkayRNExceptionLogger(), TransactionResourceProvider(reactContext))
+      psaManager = PsaManager.init(
+        reactContext,
+        OkayRNExceptionLogger(),
+        TransactionResourceProvider(reactContext)
+      )
     }
 
     if (!okayUrlEndpoint.isNullOrEmpty()) {
       psaManager!!.setPssAddress(okayUrlEndpoint)
       initGatewayServer(okayUrlEndpoint)
-      promise.resolve(JSONObject(mapOf(
-        "initStatus" to true
-      )).toString())
+      promise.resolve(
+        JSONObject(
+          mapOf(
+            "initStatus" to true
+          )
+        ).toString()
+      )
     } else {
-      promise.reject("", JSONObject(mapOf(
-        "initStatus" to false
-      )).toString())
+      promise.reject(
+        "", JSONObject(
+          mapOf(
+            "initStatus" to false
+          )
+        ).toString()
+      )
     }
   }
 
   private fun initGatewayServer(baseUrl: String) {
     GatewayRestServer.init(PsaGsonFactory().create(), "$baseUrl/gateway/")
+    val h = Handler(Looper.getMainLooper());
+    h.post {
+      PsaManager.getInstance()
+        .setFccApi(FccApiImpl.INSTANCE as FccApi<Parcel, AbstractFccData, AbstractFlutterEngineDependency>)
+    }
   }
 
 
@@ -211,10 +273,14 @@ class OkaySdkModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
           override fun onEnrollResult(p0: Int, data: Intent?) {
             data.apply {
               if (this == null) {
-                promise.reject("", JSONObject(mapOf(
-                  "enrolmentStatus" to false, "enrolmentId" to "",
-                  "externalId" to ""
-                )).toString())
+                promise.reject(
+                  "", JSONObject(
+                    mapOf(
+                      "enrolmentStatus" to false, "enrolmentId" to "",
+                      "externalId" to ""
+                    )
+                  ).toString()
+                )
                 return@apply
               }
 
@@ -222,19 +288,27 @@ class OkaySdkModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
               val resultData = PsaIntentUtils.enrollResultFromIntent(this)
               resultData.let {
                 if (it == null) {
-                  promise.reject("", JSONObject(mapOf(
-                    "enrolmentStatus" to false, "enrolmentId" to "",
-                    "externalId" to ""
-                  )).toString())
+                  promise.reject(
+                    "", JSONObject(
+                      mapOf(
+                        "enrolmentStatus" to false, "enrolmentId" to "",
+                        "externalId" to ""
+                      )
+                    ).toString()
+                  )
                   return@apply
                 }
                 mSpaStorage.putEnrollmentId(it.enrollmentId)
                 mSpaStorage.putExternalId(it.externalId)
-                promise.resolve(JSONObject(mapOf(
-                  "enrolmentId" to it.enrollmentId,
-                  "externalId" to it.externalId,
-                  "enrolmentStatus" to true
-                )).toString())
+                promise.resolve(
+                  JSONObject(
+                    mapOf(
+                      "enrolmentId" to it.enrollmentId,
+                      "externalId" to it.externalId,
+                      "enrolmentStatus" to true
+                    )
+                  ).toString()
+                )
               }
             }
           }
@@ -279,8 +353,12 @@ class OkaySdkModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
       mPickerPromise = promise
       val spaStorageMap = data.getMap("SpaStorage")
       val spaStorage: SpaStorage = SpaStorageImpl(reactContext)
-      val externalID = if (spaStorageMap?.getString("externalId").isNullOrEmpty()) mSpaStorage.externalId else spaStorageMap?.getString("externalId")
-      val enrollmentId = if (spaStorageMap?.getString("enrollmentId").isNullOrEmpty()) mSpaStorage.enrollmentId else spaStorageMap?.getString("enrollmentId")
+      val externalID = if (spaStorageMap?.getString("externalId")
+          .isNullOrEmpty()
+      ) mSpaStorage.externalId else spaStorageMap?.getString("externalId")
+      val enrollmentId = if (spaStorageMap?.getString("enrollmentId")
+          .isNullOrEmpty()
+      ) mSpaStorage.enrollmentId else spaStorageMap?.getString("enrollmentId")
       spaStorage.putExternalId(externalID)
       spaStorage.putEnrollmentId(enrollmentId)
       spaStorage.putAppPNS(spaStorageMap!!.getString("appPns"))
@@ -303,7 +381,8 @@ class OkaySdkModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
       spaStorage.putPubPssBase64(spaStorageMap.getString("pubPss"))
       spaStorage.putEnrollmentId(spaStorageMap.getString("enrollmentId"))
       spaStorage.putInstallationId(spaStorageMap.getString("installationId"))
-      PsaManager.getInstance().unlinkTenant(tenantId.toLong(), spaStorage, mUnlinkingScenarioListener)
+      PsaManager.getInstance()
+        .unlinkTenant(tenantId.toLong(), spaStorage, mUnlinkingScenarioListener)
     } catch (e: Exception) {
       promise.reject(e)
     }

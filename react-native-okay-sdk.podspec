@@ -16,7 +16,6 @@ Pod::Spec.new do |s|
   s.source_files = "ios/**/*.{h,m,mm,swift}"
 
   s.dependency "React-Core"
-  s.dependency "PSASDK", "~> 1.1.17"
-  s.dependency "FccAbstractCore", "1.0.6"
-  s.dependency 'PSAUIiOS', '1.2.3'
+  s.dependency "PSASDK", "~> 1.1.23"
+  s.dependency "FlutterCommunicationChannel", "~> 1.1.6"
 end

@@ -1,4 +1,6 @@
 import PSA
+import FlutterCommunicationChannel
+import FccAbstractCore
 
 class OkayResourceProvider: ResourceProvider {
     var biometricAlertReasonText: NSAttributedString!
@@ -52,11 +54,11 @@ class OkaySdk: NSObject {
         data["recipientLabelText"].map { text in provider.recepientLabelText = NSAttributedString(string: text)}
         data["enrollmentTitleText"].map { text in provider.enrollmentTitleText = NSAttributedString(string: text)}
         data["enrollmentDescriptionText"].map { text in provider.enrollmentDescriptionText = NSAttributedString(string: text)}
-        
+
         return provider
     }
-    
-    
+
+
     @objc(initOkay:withResolver:withRejecter:)
     func initOkay(data: NSDictionary, resolve:RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) {
         do {
@@ -69,6 +71,9 @@ class OkaySdk: NSObject {
             }
             self.okayUrlEndpoint = okayUrlEndpoint
             self.resourceProvider = initResourceProvider(data: resourceDataMap)
+            DispatchQueue.main.async {
+                PSA.update(FccApiImpl.getInstance()  as FccAbstractCore.FccApi)
+            }
             try resolve(OkayInitResponse(status: true).toString())
         } catch {
             reject("Error", "Error", error)
@@ -195,15 +200,17 @@ class OkaySdk: NSObject {
                     reject("Error", "Wrong data passed", nil)
                     return
                 }
-                PSA.startAuthorization(with: tenantTheme, sessionId: sessionId, resourceProvider: self.resourceProvider, loaderViewController: nil) {isCancelled, status, info in
-                    do {
-                        if !isCancelled && status.rawValue == 1 {
-                            try resolve(OkayAuthResponse(status: true).toString())
-                        } else {
-                            try reject("Error", OkayAuthResponse(status: false).toString(), nil)
+                DispatchQueue.main.async {
+                    PSA.startAuthorization(with: self.tenantTheme, sessionId: sessionId, resourceProvider: self.resourceProvider, loaderViewController: nil) {isCancelled, status, info in
+                        do {
+                            if !isCancelled && status.rawValue == 1 {
+                                try resolve(OkayAuthResponse(status: true).toString())
+                            } else {
+                                try reject("Error", OkayAuthResponse(status: false).toString(), nil)
+                            }
+                        } catch {
+                            reject("Error", "Failed to start authorization", error)
                         }
-                    } catch {
-                        reject("Error", "Failed to start authorization", error)
                     }
                 }
             }
