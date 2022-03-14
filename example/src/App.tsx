@@ -1,7 +1,23 @@
 import * as React from 'react';
 
-import { StyleSheet, View, Text, SafeAreaView, TextInput, TouchableOpacity } from 'react-native';
-import { startAuthorization, startEnrollment, isEnrolled, isReadyForAuthorization, linkTenant, unlinkTenant, updateDeviceToken } from 'react-native-okay-sdk';
+import {
+  StyleSheet,
+  View,
+  Text,
+  SafeAreaView,
+  TextInput,
+  TouchableOpacity,
+} from 'react-native';
+import {
+  startAuthorization,
+  startEnrollment,
+  isEnrolled,
+  isReadyForAuthorization,
+  linkTenant,
+  unlinkTenant,
+  updateDeviceToken,
+  OkayLinkResponse,
+} from 'react-native-okay-sdk';
 
 import messaging from '@react-native-firebase/messaging';
 
@@ -15,10 +31,12 @@ async function requestUserPermission() {
     authStatus === messaging.AuthorizationStatus.PROVISIONAL;
   if (enabled) {
     console.log('Authorization status:', authStatus);
-    messaging().getToken().then(token => {
-      console.log('token: ', token);
-      updateDeviceToken(token || '');
-    })
+    messaging()
+      .getToken()
+      .then((token) => {
+        console.log('token: ', token);
+        updateDeviceToken(token || '');
+      });
   }
 }
 
@@ -29,46 +47,47 @@ export default function App() {
 
   React.useEffect(() => {
     requestUserPermission();
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
+    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
       console.log('A new FCM message received!', remoteMessage.data?.data);
-      const id = JSON.parse(remoteMessage?.data?.data ?? '')?.sessionId
+      const id = JSON.parse(remoteMessage?.data?.data ?? '')?.sessionId;
       setSessionId(id?.toString() ?? '');
-
     });
 
-    return unsubscribe
+    return unsubscribe;
   }, []);
 
   const onLinkTenantClick = () => {
-    linkTenant(linkingCode, {}).then((data: string) => {
-      console.log(data);
-      const {linkingSuccessStatus, tenantId} = JSON.parse(data)
-      if(linkingSuccessStatus) {
-        setTenantId(tenantId)
-      }
-    })
-    .catch(console.error)
-  }
+    linkTenant(linkingCode)
+      .then(({ linkingSuccessStatus, tenantId }: OkayLinkResponse) => {
+        if (linkingSuccessStatus) {
+          setTenantId(tenantId);
+        }
+      })
+      .catch(console.error);
+  };
 
   const onUnlinkTenantClick = () => {
-    if(tenantId) {
-      unlinkTenant(tenantId)
+    if (tenantId) {
+      unlinkTenant(tenantId);
     }
-  }
+  };
 
   const onAuthClick = () => {
-    startAuthorization(Number(sessionId));
-  }
+    startAuthorization({
+      SpaAuthorizationData: {
+        sessionId: Number(sessionId),
+      },
+    });
+  };
 
   const onEnrollClick = () => {
     startEnrollment({
       SpaEnrollData: {
-        host: 'https://epayments.quack.click',
         pubPss: pubPssBase64,
         installationId: '9990',
       },
-    })
-  }
+    });
+  };
 
   return (
     <SafeAreaView>
@@ -86,7 +105,7 @@ export default function App() {
           <Text style={styles.buttonText}>Link device</Text>
         </TouchableOpacity>
         <TextInput
-        style={styles.textInput}
+          style={styles.textInput}
           keyboardType={'numeric'}
           placeholder="Enter tenant ID"
           value={tenantId?.toString() ?? ''}
@@ -95,7 +114,10 @@ export default function App() {
         <TouchableOpacity style={styles.button} onPress={onUnlinkTenantClick}>
           <Text style={styles.buttonText}>Unlink tenant</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={isReadyForAuthorization}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={isReadyForAuthorization}
+        >
           <Text style={styles.buttonText}>isReadyForAuthorization</Text>
         </TouchableOpacity>
         <TextInput
@@ -119,7 +141,7 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
-    height: '100%'
+    height: '100%',
   },
   textInput: {
     borderBottomWidth: 1,
@@ -127,7 +149,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     width: '60%',
     fontSize: 16,
-    padding: 5
+    padding: 5,
   },
   button: {
     width: 200,
@@ -135,10 +157,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'blue',
     color: 'white',
     justifyContent: 'center',
-    margin: 10
+    margin: 10,
   },
   buttonText: {
     color: 'white',
-    alignSelf: 'center'
-  }
+    alignSelf: 'center',
+  },
 });
