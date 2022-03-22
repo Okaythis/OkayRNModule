@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
 import com.facebook.react.bridge.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.itransition.protectoria.psa_multitenant.data.SpaStorage
@@ -26,11 +27,14 @@ import com.protectoria.psa.api.entities.SpaEnrollData
 import com.protectoria.psa.dex.common.data.enums.PsaType
 import com.protectoria.psa.dex.common.data.json.PsaGsonFactory
 import com.protectoria.psa.dex.common.ui.PageTheme
+import com.protectoria.psa.dex.design.DefaultPageTheme
 import com.protectoria.psa.dex.ui.texts.TransactionResourceProvider
 import com.protectoria.psa.scenarios.enroll.EnrollResultListener
 import com.reactnativeokaysdk.logger.OkayRNExceptionLogger
 import com.reactnativeokaysdk.resourceprovider.OkayResourceProvider
 import com.reactnativeokaysdk.storage.SpaStorageImpl
+import com.reactnativeokaysdk.utils.getBooleanOrNull
+import com.reactnativeokaysdk.utils.getIntOrNull
 import kotlinx.serialization.json.*
 import org.json.JSONObject
 
@@ -42,7 +46,6 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
   private var psaManager: PsaManager? = null
   private var mPickerPromise: Promise? = null
   private lateinit var mSpaStorage: SpaStorage
-
 
   override fun getName(): String {
     return "OkaySdk"
@@ -66,24 +69,22 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
               mSpaStorage.putEnrollmentId(it.enrollmentId)
               mSpaStorage.putExternalId(it.externalId)
               mPickerPromise?.resolve(
-                JSONObject(
-                  mapOf(
-                    "enrolmentId" to it.enrollmentId,
-                    "externalId" to it.externalId,
-                    "enrolmentStatus" to true
-                  )
-                ).toString()
+                Arguments.fromBundle(bundleOf(
+                  "enrollmentId" to it.enrollmentId,
+                  "externalId" to it.externalId,
+                  "enrollmentStatus" to true
+                ))
               )
             }
           }
         } else {
           mPickerPromise?.reject(
             "", JSONObject(
-              mapOf(
-                "enrolmentStatus" to false, "enrolmentId" to "",
-                "externalId" to ""
-              )
-            ).toString()
+            mapOf(
+              "enrollmentStatus" to false, "enrollmentId" to "",
+              "externalId" to ""
+            )
+          ).toString()
           )
         }
       }
@@ -91,19 +92,17 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
       if (requestCode == PsaConstants.ACTIVITY_REQUEST_CODE_PSA_AUTHORIZATION) {
         if (resultCode == AppCompatActivity.RESULT_OK) {
           mPickerPromise?.resolve(
-            JSONObject(
-              mapOf(
-                "authSessionStatus" to true
-              )
-            ).toString()
+            Arguments.fromBundle(bundleOf(
+              "authSessionStatus" to true
+            ))
           )
         } else {
           mPickerPromise?.reject(
             "", JSONObject(
-              mapOf(
-                "authSessionStatus" to false
-              )
-            ).toString()
+            mapOf(
+              "authSessionStatus" to false
+            )
+          ).toString()
           )
         }
       }
@@ -113,21 +112,19 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
   private val mLinkingScenarioListener: LinkingScenarioListener = object : LinkingScenarioListener {
     override fun onLinkingCompletedSuccessful(l: Long, s: String) {
       mPickerPromise!!.resolve(
-        JSONObject(
-          mapOf(
-            "linkingSuccessStatus" to true
-          )
-        ).toString()
+        Arguments.fromBundle(bundleOf(
+          "linkingSuccessStatus" to true
+        ))
       )
     }
 
     override fun onLinkingFailed(applicationState: ApplicationState) {
       mPickerPromise!!.reject(
         "", JSONObject(
-          mapOf(
-            "linkingSuccessStatus" to false, "error" to applicationState.toString()
-          )
-        ).toString()
+        mapOf(
+          "linkingSuccessStatus" to false, "error" to applicationState.toString()
+        )
+      ).toString()
       )
     }
   }
@@ -136,21 +133,17 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
     object : UnlinkingScenarioListener {
       override fun onUnlinkingCompletedSuccessful() {
         mPickerPromise!!.resolve(
-          JSONObject(
-            mapOf(
-              "unlinkingSuccessStatus" to true
-            )
-          ).toString()
+          Arguments.fromBundle(bundleOf(
+            "unlinkingSuccessStatus" to true
+          ))
         )
       }
 
       override fun onUnlinkingFailed(applicationState: ApplicationState) {
         mPickerPromise!!.resolve(
-          JSONObject(
-            mapOf(
-              "unlinkingSuccessStatus" to false, "error" to applicationState.toString()
-            )
-          ).toString()
+          Arguments.fromBundle(bundleOf(
+            "unlinkingSuccessStatus" to false, "error" to applicationState.toString()
+          ))
         )
       }
     }
@@ -166,9 +159,8 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
   fun initOkay(data: ReadableMap, promise: Promise) {
 
     val resourceProvider: OkayResourceProvider
-    val initDataMap = data.getMap("initData")
-    val okayUrlEndpoint = initDataMap?.getString("okayUrlEndpoint")
-    val resourceProviderMap = initDataMap?.getMap("resourceProvider")
+    val okayUrlEndpoint = data.getString("okayUrlEndpoint")
+    val resourceProviderMap = data.getMap("resourceProvider")
 
     if (resourceProviderMap != null) {
       resourceProvider = OkayResourceProvider(
@@ -221,19 +213,17 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
       psaManager!!.setPssAddress(okayUrlEndpoint)
       initGatewayServer(okayUrlEndpoint)
       promise.resolve(
-        JSONObject(
-          mapOf(
-            "initStatus" to true
-          )
-        ).toString()
+        Arguments.fromBundle(bundleOf(
+          "initStatus" to true
+        ))
       )
     } else {
       promise.reject(
         "", JSONObject(
-          mapOf(
-            "initStatus" to false
-          )
-        ).toString()
+        mapOf(
+          "initStatus" to false
+        )
+      ).toString()
       )
     }
   }
@@ -253,15 +243,14 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
     val activity: Activity? = reactContext!!.currentActivity
     mPickerPromise = promise
 
-    val spaEnrollDataMap = data.getMap("SpaEnrollData")
-    val appPns = spaEnrollDataMap!!.getString("appPns")
-    val pubPss = spaEnrollDataMap.getString("pubPss")
-    val installationId = spaEnrollDataMap.getString("installationId")
-    val enrollInBackground = spaEnrollDataMap.getBoolean("enrollInBackground")
-    val pageThemeMap = spaEnrollDataMap.getMap("pageTheme")
+    val appPns = data.getString("appPns")
+    val pubPss = data.getString("pubPss")
+    val installationId = data.getString("installationId")
+    val enrollInBackground = data.getBooleanOrNull("enrollInBackground")
+    val pageThemeMap = data.getMap("pageTheme")
     val psaType = PsaType.OKAY
 
-    if (enrollInBackground) {
+    if (enrollInBackground == true) {
       PsaManager.getInstance().startBackgroundEnroll(
         SpaEnrollData(
           appPns,
@@ -270,49 +259,47 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
           null,
           psaType
         ), object : EnrollResultListener {
-          override fun onEnrollResult(p0: Int, data: Intent?) {
-            data.apply {
-              if (this == null) {
+        override fun onEnrollResult(p0: Int, data: Intent?) {
+          data.apply {
+            if (this == null) {
+              promise.reject(
+                "", JSONObject(
+                mapOf(
+                  "enrollmentStatus" to false, "enrollmentId" to "",
+                  "externalId" to ""
+                )
+              ).toString()
+              )
+              return@apply
+            }
+
+
+            val resultData = PsaIntentUtils.enrollResultFromIntent(this)
+            resultData.let {
+              if (it == null) {
                 promise.reject(
                   "", JSONObject(
-                    mapOf(
-                      "enrolmentStatus" to false, "enrolmentId" to "",
-                      "externalId" to ""
-                    )
-                  ).toString()
+                  mapOf(
+                    "enrollmentStatus" to false, "enrollmentId" to "",
+                    "externalId" to ""
+                  )
+                ).toString()
                 )
                 return@apply
               }
-
-
-              val resultData = PsaIntentUtils.enrollResultFromIntent(this)
-              resultData.let {
-                if (it == null) {
-                  promise.reject(
-                    "", JSONObject(
-                      mapOf(
-                        "enrolmentStatus" to false, "enrolmentId" to "",
-                        "externalId" to ""
-                      )
-                    ).toString()
-                  )
-                  return@apply
-                }
-                mSpaStorage.putEnrollmentId(it.enrollmentId)
-                mSpaStorage.putExternalId(it.externalId)
-                promise.resolve(
-                  JSONObject(
-                    mapOf(
-                      "enrolmentId" to it.enrollmentId,
-                      "externalId" to it.externalId,
-                      "enrolmentStatus" to true
-                    )
-                  ).toString()
-                )
-              }
+              mSpaStorage.putEnrollmentId(it.enrollmentId)
+              mSpaStorage.putExternalId(it.externalId)
+              promise.resolve(
+                Arguments.fromBundle(bundleOf(
+                  "enrollmentId" to it.enrollmentId,
+                  "externalId" to it.externalId,
+                  "enrollmentStatus" to true
+                ))
+              )
             }
           }
-        }, reactContext
+        }
+      }, reactContext
       )
       return
     }
@@ -333,37 +320,39 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
     val activity: Activity? = reactContext!!.currentActivity
     mPickerPromise = promise
 
-    val spaEnrollDataMap = data.getMap("SpaAuthorizationData")
-    val sessionId = spaEnrollDataMap!!.getInt("sessionId")
-    val appPNS = spaEnrollDataMap.getString("appPns")
-    val pageThemeMap = spaEnrollDataMap.getMap("pageTheme")
+    val sessionId = data.getIntOrNull("sessionId")
+    val appPNS = data.getString("appPns")
+    val pageThemeMap = data.getMap("pageTheme")
     val psaType = PsaType.OKAY
-    val authorizationData: SpaAuthorizationData = if (pageThemeMap != null) {
-      val pageTheme = initPageTheme(pageThemeMap, promise)
-      SpaAuthorizationData(sessionId.toLong(), appPNS, pageTheme, psaType)
-    } else {
-      SpaAuthorizationData(sessionId.toLong(), appPNS, null, psaType)
-    }
-    PsaManager.startAuthorizationActivity(activity, authorizationData)
+    takeIf { sessionId !== null && appPNS !== null }
+      ?.run {
+        val authorizationData: SpaAuthorizationData = if (pageThemeMap != null) {
+          val pageTheme = initPageTheme(pageThemeMap, promise)
+          SpaAuthorizationData(sessionId!!.toLong(), appPNS, pageTheme, psaType)
+        } else {
+          SpaAuthorizationData(sessionId!!.toLong(), appPNS, null, psaType)
+        }
+        PsaManager.startAuthorizationActivity(activity, authorizationData)
+      }
+      ?: promise.reject("", "sessionId or appPns were not provided")
   }
 
   @ReactMethod
   fun linkTenant(linkingCode: String?, data: ReadableMap, promise: Promise) {
     try {
       mPickerPromise = promise
-      val spaStorageMap = data.getMap("SpaStorage")
       val spaStorage: SpaStorage = SpaStorageImpl(reactContext)
-      val externalID = if (spaStorageMap?.getString("externalId")
+      val externalID = if (data.getString("externalId")
           .isNullOrEmpty()
-      ) mSpaStorage.externalId else spaStorageMap?.getString("externalId")
-      val enrollmentId = if (spaStorageMap?.getString("enrollmentId")
+      ) mSpaStorage.externalId else data.getString("externalId")
+      val enrollmentId = if (data.getString("enrollmentId")
           .isNullOrEmpty()
-      ) mSpaStorage.enrollmentId else spaStorageMap?.getString("enrollmentId")
+      ) mSpaStorage.enrollmentId else data.getString("enrollmentId")
       spaStorage.putExternalId(externalID)
       spaStorage.putEnrollmentId(enrollmentId)
-      spaStorage.putAppPNS(spaStorageMap!!.getString("appPns"))
-      spaStorage.putPubPssBase64(spaStorageMap.getString("pubPss"))
-      spaStorage.putInstallationId(spaStorageMap.getString("installationId"))
+      spaStorage.putAppPNS(data.getString("appPns"))
+      spaStorage.putPubPssBase64(data.getString("pubPss"))
+      spaStorage.putInstallationId(data.getString("installationId"))
       psaManager!!.linkTenant(linkingCode, spaStorage, mLinkingScenarioListener)
     } catch (e: Exception) {
       promise.reject(e)
@@ -374,13 +363,12 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
   fun unlinkTenant(tenantId: Int, data: ReadableMap, promise: Promise) {
     try {
       mPickerPromise = promise
-      val spaStorageMap = data.getMap("SpaStorage")
       val spaStorage: SpaStorage = SpaStorageImpl(reactContext)
-      spaStorage.putAppPNS(spaStorageMap!!.getString("appPns"))
-      spaStorage.putExternalId(spaStorageMap.getString("externalId"))
-      spaStorage.putPubPssBase64(spaStorageMap.getString("pubPss"))
-      spaStorage.putEnrollmentId(spaStorageMap.getString("enrollmentId"))
-      spaStorage.putInstallationId(spaStorageMap.getString("installationId"))
+      spaStorage.putAppPNS(data.getString("appPns"))
+      spaStorage.putExternalId(data.getString("externalId"))
+      spaStorage.putPubPssBase64(data.getString("pubPss"))
+      spaStorage.putEnrollmentId(data.getString("enrollmentId"))
+      spaStorage.putInstallationId(data.getString("installationId"))
       PsaManager.getInstance()
         .unlinkTenant(tenantId.toLong(), spaStorage, mUnlinkingScenarioListener)
     } catch (e: Exception) {
@@ -414,10 +402,15 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
     promise.resolve(writableArray)
   }
 
+  @ReactMethod
+  fun updateDeviceToken(token: String, promise: Promise) {
+    promise.resolve(false)
+  }
+
 
   private fun initPageTheme(pageThemeMap: ReadableMap?, promise: Promise): PageTheme {
     val mapper = ObjectMapper()
-    var pageTheme = PageTheme()
+    var pageTheme: PageTheme = DefaultPageTheme.getDefaultPageTheme(reactContext)
     try {
       pageTheme = mapper.convertValue(toMap(pageThemeMap), PageTheme::class.java)
     } catch (e: Exception) {

@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   TextInput,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
 import {
   startAuthorization,
@@ -17,14 +18,16 @@ import {
   unlinkTenant,
   updateDeviceToken,
   OkayLinkResponse,
+  initOkay,
 } from 'react-native-okay-sdk';
 
 import messaging from '@react-native-firebase/messaging';
 
+let installationID = Platform.OS === 'android' ? '9990' : '9980';
 const pubPssBase64 =
   'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxgyacF1NNWTA6rzCrtK60se9fVpTPe3HiDjHB7MybJvNdJZIgZbE9k3gQ6cdEYgTOSG823hkJCVHZrcf0/AK7G8Xf/rjhWxccOEXFTg4TQwmhbwys+sY/DmGR8nytlNVbha1DV/qOGcqAkmn9SrqW76KK+EdQFpbiOzw7RRWZuizwY3BqRfQRokr0UBJrJrizbT9ZxiVqGBwUDBQrSpsj3RUuoj90py1E88ExyaHui+jbXNITaPBUFJjbas5OOnSLVz6GrBPOD+x0HozAoYuBdoztPRxpjoNIYvgJ72wZ3kOAVPAFb48UROL7sqK2P/jwhdd02p/MDBZpMl/+BG+qQIDAQAB';
 
-async function requestUserPermission() {
+async function requestUserPermission(callback: (token: string) => void) {
   const authStatus = await messaging().requestPermission();
   const enabled =
     authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
@@ -36,7 +39,23 @@ async function requestUserPermission() {
       .then((token) => {
         console.log('token: ', token);
         updateDeviceToken(token || '');
+        callback(token);
       });
+  }
+}
+
+async function initSdk(callback: (token: string) => void) {
+  try {
+    requestUserPermission(callback);
+    const response = await initOkay({
+      okayUrlEndpoint: 'https://demostand.okaythis.com',
+      resourceProvider: {
+        iosBiometricAlertReasonText: 'Test Alert',
+      },
+    });
+    console.log('Init sdk status: ', response.initStatus);
+  } catch (error) {
+    console.error('Error init sdk', error);
   }
 }
 
@@ -44,9 +63,11 @@ export default function App() {
   const [linkingCode, setLinkingCode] = React.useState('');
   const [sessionId, setSessionId] = React.useState('');
   const [tenantId, setTenantId] = React.useState<number>();
+  const [deviceToken, setDeviceToken] = React.useState('');
+  const [externalId, setExternalId] = React.useState('');
 
   React.useEffect(() => {
-    requestUserPermission();
+    initSdk(setDeviceToken);
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
       console.log('A new FCM message received!', remoteMessage.data?.data);
       const id = JSON.parse(remoteMessage?.data?.data ?? '')?.sessionId;
@@ -57,7 +78,12 @@ export default function App() {
   }, []);
 
   const onLinkTenantClick = () => {
-    linkTenant(linkingCode)
+    linkTenant(linkingCode, {
+      appPns: deviceToken,
+      pubPss: pubPssBase64,
+      externalId: externalId,
+      installationId: installationID,
+    })
       .then(({ linkingSuccessStatus, tenantId }: OkayLinkResponse) => {
         if (linkingSuccessStatus) {
           setTenantId(tenantId);
@@ -68,24 +94,29 @@ export default function App() {
 
   const onUnlinkTenantClick = () => {
     if (tenantId) {
-      unlinkTenant(tenantId);
+      unlinkTenant(tenantId, {
+        appPns: deviceToken,
+        pubPss: pubPssBase64,
+        externalId: externalId,
+        installationId: installationID,
+      });
     }
   };
 
   const onAuthClick = () => {
     startAuthorization({
-      SpaAuthorizationData: {
-        sessionId: Number(sessionId),
-      },
+      sessionId: Number(sessionId),
+      appPns: deviceToken,
     });
   };
 
   const onEnrollClick = () => {
     startEnrollment({
-      SpaEnrollData: {
-        pubPss: pubPssBase64,
-        installationId: '9990',
-      },
+      appPns: deviceToken,
+      pubPss: pubPssBase64,
+      installationId: installationID,
+    }).then((response) => {
+      setExternalId(response.externalId);
     });
   };
 

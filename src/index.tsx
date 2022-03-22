@@ -95,37 +95,29 @@ export interface ResourceProvider {
 }
 
 export interface InitData {
-  initData: {
-    okayUrlEndpoint: string;
-    resourceProvider: ResourceProvider;
-  };
+  okayUrlEndpoint: string;
+  resourceProvider: ResourceProvider;
 }
 
 export interface SpaEnrollData {
-  SpaEnrollData: {
-    pubPss: string;
-    installationId: string;
-    appPns?: string;
-    pageTheme?: PSATheme;
-    enrollInBackground?: boolean;
-  };
+  pubPss: string;
+  installationId: string;
+  appPns?: string;
+  pageTheme?: PSATheme;
+  enrollInBackground?: boolean;
 }
 
 export interface SpaAuthData {
-  SpaAuthorizationData: {
-    sessionId: number;
-    appPns?: string;
-    pageTheme?: PSATheme;
-  };
+  sessionId: number;
+  appPns?: string;
+  pageTheme?: PSATheme;
 }
 export interface SpaStorageData {
-  SpaStorageData: {
-    externalId?: string;
-    enrollmentId?: string;
-    appPns: string;
-    pubPss: string;
-    installationId: string;
-  };
+  externalId?: string;
+  enrollmentId?: string;
+  appPns: string;
+  pubPss: string;
+  installationId: string;
 }
 
 export interface OkayInitResponse {

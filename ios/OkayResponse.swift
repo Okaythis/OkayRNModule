@@ -7,14 +7,20 @@
 
 import Foundation
 
-public protocol OkayResponse: Encodable {
+public protocol OkayResponse: Codable {
     func toString() throws -> String
+    func toDictionary() throws -> NSDictionary
 }
 
 extension OkayResponse {
     public func toString() throws -> String {
         let response = try JSONEncoder().encode(self)
         return String(data: response, encoding: .utf8)!
+    }
+    public func toDictionary() throws -> NSDictionary {
+        let data = try JSONEncoder().encode(self)
+        let dictionary = try JSONSerialization.jsonObject(with: data, options: [])
+        return (dictionary as? [String: Any] ?? [:]) as NSDictionary
     }
 }
 
