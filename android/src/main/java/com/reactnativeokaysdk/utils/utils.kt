@@ -1,5 +1,6 @@
 package com.reactnativeokaysdk.utils
 
+import com.facebook.react.bridge.ReadableMap
 import kotlinx.serialization.json.*
 
 fun Any?.toJsonElement(): JsonElement {
@@ -36,3 +37,7 @@ fun Map<*, *>.toJsonObject(): JsonObject {
   }
   return JsonObject(map)
 }
+
+fun ReadableMap.getBooleanOrNull(key: String): Boolean? = takeIf { hasKey(key) }?.run { getBoolean(key) }
+fun ReadableMap.getIntOrNull(key: String): Int? = takeIf { hasKey(key) }?.run { getInt(key) }
+
