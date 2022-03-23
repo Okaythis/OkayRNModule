@@ -138,9 +138,7 @@ We will need to call the initOkay(object) on the SDK to properly initialize the 
 
 ```javascript
   OkaySdk.initOkay({
-    initData: {
       okayUrlEndpoint: 'https://demostand.okaythis.com',
-    },
   })
 ```
 
@@ -192,8 +190,6 @@ If the required permissiosn have been granted on the device, we can now proceed 
 ```javascript
 messaging().getToken().then(token => {
     RNOkaySdk.startEnrollment({
-        SpaEnrollData: {
-            host: "https://demostand.okaythis.com/", // Okay server address
             appPns: token,
             pubPss: pubPssBase64,
             installationId: "9990",
@@ -204,13 +200,12 @@ messaging().getToken().then(token => {
               actionBarTextColor: "#ffffff",
               buttonTextColor: "#ffffff",
             }
-          }
         }).then(response => console.log(response));
     })
 ```
 SpaEnrollData contains several keys that are required for a secure communication with Okay servers.
 
-*"appPns"*: This is your push notification token from Firebase(or Firebase registration token for iOS devices if you are using Firebase for push notification on iOS) or APNS token if you are using APNS. This allows us to send 2FA notifications to your apps. 
+*"appPns"*: This is your push notification token from Firebase(or Firebase registration token for iOS devices if you are using Firebase for push notification on iOS) or APNS token if you are using APNS. This allows us to send 2FA notifications to your apps.
 
 *"installationId"*: The installationId is a unique value that identifies unique installation keys for the Okay SDK in an app. For testing purposes we ask our users to use this value **9990** as their installationId
 
@@ -225,7 +220,7 @@ SpaEnrollData contains several keys that are required for a secure communication
 
 
 ### **How to link a user**
-The linkTenant(linkingCode, SpaStorage) method links a user of your application with an existing tenant on the Okay secure server. When you make a linking request to the Okay server, it returns a linkingCode as part of its response (For more information on how to send a linking request please see this [documatation](https://okaythis.com/developer/documentation/v1/server#1.2)). The linking code can be passed directly to this method after a successful linking request to the Okay Service. 
+The linkTenant(linkingCode, SpaStorage) method links a user of your application with an existing tenant on the Okay secure server. When you make a linking request to the Okay server, it returns a linkingCode as part of its response (For more information on how to send a linking request please see this [documatation](https://okaythis.com/developer/documentation/v1/server#1.2)). The linking code can be passed directly to this method after a successful linking request to the Okay Service.
 
 The **externalId** can be retrieved from the *RNOkaySdk.startEnrollment(...).then( externalId => ...)* method, if the method was called and executed successfully.
 
@@ -234,13 +229,11 @@ messaging().getToken().then(token => {
     RNOkaySdk.linkTenant(
         linkingCode,
         {
-          SpaStorage: {
             appPns: token,
             pubPss: pubPssBase64,
             externalId: 'YOUR_EXTERNAL_ID',
             installationId: "9990",
             enrollmentId: null
-          }
         })
     })
 ```
@@ -253,16 +246,14 @@ messaging().getToken().then(token => {
     RNOkaySdk.unlinkTenant(
         tenantId,
         {
-          SpaStorage: {
             appPns: token,
             pubPss: pubPssBase64,
             externalId: 'YOUR_EXTERNAL_ID',
             installationId: "9990",
             enrollmentId: null
-          }
       })
     })
-  
+
 ```
 
 
@@ -283,12 +274,10 @@ When the push notification is received on the client side, you should retrieve t
 messaging().onMessage(async message => {
     let data = JSON.parse(message.data.data);
     let response = await OkaySdk.startAuthorization({
-        SpaAuthorizationData: {
             sessionId: data.sessionId,
             appPns: deviceToken,
             pageTheme: null,
-        },
-    });         
+    });
 });
 
 ```
