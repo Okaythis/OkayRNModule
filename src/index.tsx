@@ -94,9 +94,15 @@ export interface ResourceProvider {
   iosMassPaymentDetailsHeaderText?: string;
 }
 
+export interface FontVariants {
+  fontVariant: string;
+  fontAssetPath: string;
+}
+
 export interface InitData {
   okayUrlEndpoint: string;
   resourceProvider: ResourceProvider;
+  fontConfig?: Array<FontVariants>;
 }
 
 export interface SpaEnrollData {
@@ -108,6 +114,7 @@ export interface SpaEnrollData {
 }
 
 export interface SpaAuthData {
+  deviceUiType: string;
   sessionId: number;
   appPns?: string;
   pageTheme?: PSATheme;

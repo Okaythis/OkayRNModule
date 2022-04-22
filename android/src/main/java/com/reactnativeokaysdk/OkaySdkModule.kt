@@ -14,6 +14,8 @@ import com.itransition.protectoria.psa_multitenant.protocol.scenarios.linking.Li
 import com.itransition.protectoria.psa_multitenant.protocol.scenarios.unlinking.UnlinkingScenarioListener
 import com.itransition.protectoria.psa_multitenant.restapi.GatewayRestServer
 import com.itransition.protectoria.psa_multitenant.state.ApplicationState
+import com.okaythis.fccabstractcore.data.dto.fonts.LocalStorageCustomFontConfig
+import com.okaythis.fccabstractcore.data.dto.fonts.config.LocalFontConfig
 import com.okaythis.fccabstractcore.interfaces.data.AbstractFccData
 import com.okaythis.fccabstractcore.interfaces.data.AbstractFlutterEngineDependency
 import com.okaythis.fccabstractcore.interfaces.fcc.FccApi
@@ -30,13 +32,14 @@ import com.protectoria.psa.dex.common.ui.PageTheme
 import com.protectoria.psa.dex.design.DefaultPageTheme
 import com.protectoria.psa.dex.ui.texts.TransactionResourceProvider
 import com.protectoria.psa.scenarios.enroll.EnrollResultListener
+import com.protectoria.psa.scenarios.transaction.TransactionResultListener
 import com.reactnativeokaysdk.logger.OkayRNExceptionLogger
 import com.reactnativeokaysdk.resourceprovider.OkayResourceProvider
 import com.reactnativeokaysdk.storage.SpaStorageImpl
 import com.reactnativeokaysdk.utils.getBooleanOrNull
 import com.reactnativeokaysdk.utils.getIntOrNull
-import kotlinx.serialization.json.*
 import org.json.JSONObject
+import timber.log.Timber
 
 
 class OkaySdkModule(reactContext: ReactApplicationContext) :
@@ -69,22 +72,24 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
               mSpaStorage.putEnrollmentId(it.enrollmentId)
               mSpaStorage.putExternalId(it.externalId)
               mPickerPromise?.resolve(
-                Arguments.fromBundle(bundleOf(
-                  "enrollmentId" to it.enrollmentId,
-                  "externalId" to it.externalId,
-                  "enrollmentStatus" to true
-                ))
+                Arguments.fromBundle(
+                  bundleOf(
+                    "enrollmentId" to it.enrollmentId,
+                    "externalId" to it.externalId,
+                    "enrollmentStatus" to true
+                  )
+                )
               )
             }
           }
         } else {
           mPickerPromise?.reject(
             "", JSONObject(
-            mapOf(
-              "enrollmentStatus" to false, "enrollmentId" to "",
-              "externalId" to ""
-            )
-          ).toString()
+              mapOf(
+                "enrollmentStatus" to false, "enrollmentId" to "",
+                "externalId" to ""
+              )
+            ).toString()
           )
         }
       }
@@ -92,17 +97,19 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
       if (requestCode == PsaConstants.ACTIVITY_REQUEST_CODE_PSA_AUTHORIZATION) {
         if (resultCode == AppCompatActivity.RESULT_OK) {
           mPickerPromise?.resolve(
-            Arguments.fromBundle(bundleOf(
-              "authSessionStatus" to true
-            ))
+            Arguments.fromBundle(
+              bundleOf(
+                "authSessionStatus" to true
+              )
+            )
           )
         } else {
           mPickerPromise?.reject(
             "", JSONObject(
-            mapOf(
-              "authSessionStatus" to false
-            )
-          ).toString()
+              mapOf(
+                "authSessionStatus" to false
+              )
+            ).toString()
           )
         }
       }
@@ -112,19 +119,21 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
   private val mLinkingScenarioListener: LinkingScenarioListener = object : LinkingScenarioListener {
     override fun onLinkingCompletedSuccessful(l: Long, s: String) {
       mPickerPromise!!.resolve(
-        Arguments.fromBundle(bundleOf(
-          "linkingSuccessStatus" to true
-        ))
+        Arguments.fromBundle(
+          bundleOf(
+            "linkingSuccessStatus" to true
+          )
+        )
       )
     }
 
     override fun onLinkingFailed(applicationState: ApplicationState) {
       mPickerPromise!!.reject(
         "", JSONObject(
-        mapOf(
-          "linkingSuccessStatus" to false, "error" to applicationState.toString()
-        )
-      ).toString()
+          mapOf(
+            "linkingSuccessStatus" to false, "error" to applicationState.toString()
+          )
+        ).toString()
       )
     }
   }
@@ -133,17 +142,21 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
     object : UnlinkingScenarioListener {
       override fun onUnlinkingCompletedSuccessful() {
         mPickerPromise!!.resolve(
-          Arguments.fromBundle(bundleOf(
-            "unlinkingSuccessStatus" to true
-          ))
+          Arguments.fromBundle(
+            bundleOf(
+              "unlinkingSuccessStatus" to true
+            )
+          )
         )
       }
 
       override fun onUnlinkingFailed(applicationState: ApplicationState) {
         mPickerPromise!!.resolve(
-          Arguments.fromBundle(bundleOf(
-            "unlinkingSuccessStatus" to false, "error" to applicationState.toString()
-          ))
+          Arguments.fromBundle(
+            bundleOf(
+              "unlinkingSuccessStatus" to false, "error" to applicationState.toString()
+            )
+          )
         )
       }
     }
@@ -151,6 +164,7 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
   init {
     this.reactContext = reactContext
     mSpaStorage = SpaStorageImpl(reactContext)
+    Timber.plant(Timber.DebugTree())
     reactContext.addActivityEventListener(mActivityEventListener)
   }
 
@@ -161,6 +175,22 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
     val resourceProvider: OkayResourceProvider
     val okayUrlEndpoint = data.getString("okayUrlEndpoint")
     val resourceProviderMap = data.getMap("resourceProvider")
+    val fontConfigArray = data.getArray("fontConfig")
+    val fontConfig = arrayListOf<LocalFontConfig>()
+
+    if (fontConfigArray != null) {
+      for (i in 0 until fontConfigArray.size()) {
+        val config = fontConfigArray.getMap(i)
+        val fontVariant = config?.getString("fontVariant")
+        val fontAssetPath = config?.getString("fontAssetPath")
+        if (fontVariant != null && fontAssetPath != null) {
+          Timber.d("Font variants: $fontVariant - $fontAssetPath")
+          reactContext?.assets?.let {
+            fontConfig.add(LocalFontConfig(fontVariant, it.open(fontAssetPath)))
+          }
+        }
+      }
+    }
 
     if (resourceProviderMap != null) {
       resourceProvider = OkayResourceProvider(
@@ -211,27 +241,37 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
 
     if (!okayUrlEndpoint.isNullOrEmpty()) {
       psaManager!!.setPssAddress(okayUrlEndpoint)
-      initGatewayServer(okayUrlEndpoint)
+      initGatewayServer(okayUrlEndpoint, fontConfig)
       promise.resolve(
-        Arguments.fromBundle(bundleOf(
-          "initStatus" to true
-        ))
+        Arguments.fromBundle(
+          bundleOf(
+            "initStatus" to true
+          )
+        )
       )
     } else {
       promise.reject(
         "", JSONObject(
-        mapOf(
-          "initStatus" to false
-        )
-      ).toString()
+          mapOf(
+            "initStatus" to false
+          )
+        ).toString()
       )
     }
   }
 
-  private fun initGatewayServer(baseUrl: String) {
+  private fun initGatewayServer(baseUrl: String, fontConfig: ArrayList<LocalFontConfig>?) {
     GatewayRestServer.init(PsaGsonFactory().create(), "$baseUrl/gateway/")
     val h = Handler(Looper.getMainLooper());
     h.post {
+      if (fontConfig != null) {
+        PsaManager.getInstance()
+          .setFccApi(
+            FccApiImpl.INSTANCE as FccApi<Parcel, AbstractFccData, AbstractFlutterEngineDependency>,
+            LocalStorageCustomFontConfig(fontConfig)
+          )
+        return@post
+      }
       PsaManager.getInstance()
         .setFccApi(FccApiImpl.INSTANCE as FccApi<Parcel, AbstractFccData, AbstractFlutterEngineDependency>)
     }
@@ -259,47 +299,49 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
           null,
           psaType
         ), object : EnrollResultListener {
-        override fun onEnrollResult(p0: Int, data: Intent?) {
-          data.apply {
-            if (this == null) {
-              promise.reject(
-                "", JSONObject(
-                mapOf(
-                  "enrollmentStatus" to false, "enrollmentId" to "",
-                  "externalId" to ""
-                )
-              ).toString()
-              )
-              return@apply
-            }
-
-
-            val resultData = PsaIntentUtils.enrollResultFromIntent(this)
-            resultData.let {
-              if (it == null) {
+          override fun onEnrollResult(p0: Int, data: Intent?) {
+            data.apply {
+              if (this == null) {
                 promise.reject(
                   "", JSONObject(
-                  mapOf(
-                    "enrollmentStatus" to false, "enrollmentId" to "",
-                    "externalId" to ""
-                  )
-                ).toString()
+                    mapOf(
+                      "enrollmentStatus" to false, "enrollmentId" to "",
+                      "externalId" to ""
+                    )
+                  ).toString()
                 )
                 return@apply
               }
-              mSpaStorage.putEnrollmentId(it.enrollmentId)
-              mSpaStorage.putExternalId(it.externalId)
-              promise.resolve(
-                Arguments.fromBundle(bundleOf(
-                  "enrollmentId" to it.enrollmentId,
-                  "externalId" to it.externalId,
-                  "enrollmentStatus" to true
-                ))
-              )
+
+
+              val resultData = PsaIntentUtils.enrollResultFromIntent(this)
+              resultData.let {
+                if (it == null) {
+                  promise.reject(
+                    "", JSONObject(
+                      mapOf(
+                        "enrollmentStatus" to false, "enrollmentId" to "",
+                        "externalId" to ""
+                      )
+                    ).toString()
+                  )
+                  return@apply
+                }
+                mSpaStorage.putEnrollmentId(it.enrollmentId)
+                mSpaStorage.putExternalId(it.externalId)
+                promise.resolve(
+                  Arguments.fromBundle(
+                    bundleOf(
+                      "enrollmentId" to it.enrollmentId,
+                      "externalId" to it.externalId,
+                      "enrollmentStatus" to true
+                    )
+                  )
+                )
+              }
             }
           }
-        }
-      }, reactContext
+        }, reactContext
       )
       return
     }
@@ -322,8 +364,34 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
 
     val sessionId = data.getIntOrNull("sessionId")
     val appPNS = data.getString("appPns")
+    val deviceUiType = data.getString("deviceUiType")
     val pageThemeMap = data.getMap("pageTheme")
     val psaType = PsaType.OKAY
+
+    val resultListener =
+      TransactionResultListener { resultCode, data ->
+        data?.let {
+          if (resultCode == AppCompatActivity.RESULT_OK) {
+            mPickerPromise?.resolve(
+              Arguments.fromBundle(
+                bundleOf(
+                  "authSessionStatus" to true
+                )
+              )
+            )
+          } else {
+            mPickerPromise?.reject(
+              "", JSONObject(
+                mapOf(
+                  "authSessionStatus" to false
+                )
+              ).toString()
+            )
+          }
+        }
+      }
+
+
     takeIf { sessionId !== null && appPNS !== null }
       ?.run {
         val authorizationData: SpaAuthorizationData = if (pageThemeMap != null) {
@@ -331,6 +399,10 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
           SpaAuthorizationData(sessionId!!.toLong(), appPNS, pageTheme, psaType)
         } else {
           SpaAuthorizationData(sessionId!!.toLong(), appPNS, null, psaType)
+        }
+        if (deviceUiType == "FLUTTER") {
+          PsaManager.getInstance().startAuthorizationWithAbstractUI(activity, authorizationData, resultListener)
+          return
         }
         PsaManager.startAuthorizationActivity(activity, authorizationData)
       }
@@ -410,10 +482,11 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
 
   private fun initPageTheme(pageThemeMap: ReadableMap?, promise: Promise): PageTheme {
     val mapper = ObjectMapper()
-    var pageTheme: PageTheme = DefaultPageTheme.getDefaultPageTheme(reactContext)
+    var pageTheme: PageTheme = DefaultPageTheme.getDefaultPageTheme(reactContext);
     try {
       pageTheme = mapper.convertValue(toMap(pageThemeMap), PageTheme::class.java)
     } catch (e: Exception) {
+      Timber.d(e)
       promise.reject("", "Invalid object property")
     }
     return pageTheme
