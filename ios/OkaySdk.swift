@@ -40,7 +40,7 @@ class OkaySdk: NSObject {
     var tenantTheme: PSATheme?
     var resourceProvider: OkayResourceProvider = OkayResourceProvider()
     var okayUrlEndpoint: String?
-    
+
     internal func initResourceProvider(data: [String: String]) -> OkayResourceProvider {
         let provider = OkayResourceProvider()
         data["iosBiometricAlertReasonText"].map { text in provider.biometricAlertReasonText = NSAttributedString(string: text)}
@@ -64,14 +64,47 @@ class OkaySdk: NSObject {
         do {
             guard let okayUrlEndpoint = data["okayUrlEndpoint"] as? String,
                   let resourceDataMap = data["resourceProvider"] as? [String: String]
+
             else {
                 try resolve(OkayInitResponse(status: false).toDictionary());
                 return;
             }
             self.okayUrlEndpoint = okayUrlEndpoint
             self.resourceProvider = initResourceProvider(data: resourceDataMap)
+
+            let fontArray = data["fontConfig"] as? [[String:String]]
+            var fontConfigList: [LocalFontConfig] = []
+
+            if(fontArray != nil){
+                fontArray!.forEach { dict in
+                    let fontVariant = dict["fontVariant"]
+                    let assetPath = dict["fontAssetPath"]
+
+                    if(assetPath == nil || fontVariant == nil){
+                        return
+                    }
+
+                    guard let fontAsset = Bundle.main.url(forResource:  assetPath, withExtension: nil)
+                    else{
+                        reject("Error", "Couldn't find font in main bundle", nil)
+                        return
+                    }
+
+                    do{
+                        let fontData = try Data(contentsOf: fontAsset)
+                        fontConfigList.append(LocalFontConfig(fontVariant: fontVariant ?? "", fontFileResource: fontData))
+                    }catch{
+                        reject("Error", "Couldn't load font data from main bundle", error)
+                    }
+                }
+            }
+
             DispatchQueue.main.async {
-                PSA.update(FccApiImpl.getInstance()  as FccAbstractCore.FccApi)
+                if(fontConfigList.isEmpty){
+                    PSA.update(FccApiImpl.getInstance() as FccAbstractCore.FccApi)
+                    return
+                }
+                PSA.update(FccApiImpl.getInstance(), fontConfig: LocalStorageCustomFontConfig(fontConfigList: fontConfigList))
             }
             try resolve(OkayInitResponse(status: true).toDictionary())
         } catch {
@@ -94,7 +127,7 @@ class OkaySdk: NSObject {
     @objc(startEnrollment:withResolver:withRejecter:)
     func startEnrollment(spaEnrollData: NSDictionary, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
         guard let pubPss = spaEnrollData["pubPss"] as? String,
-            let installationId = spaEnrollData["installationId"] as? String
+              let installationId = spaEnrollData["installationId"] as? String
         else {
             reject("Error", "Wrong data passed", nil)
             return
