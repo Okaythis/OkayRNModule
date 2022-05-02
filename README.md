@@ -339,7 +339,7 @@ Push Notification Sample:
   }
 ```
 
-When the push notification is received on the client side, you should retrieve the **_sessionId_** and **_deviceUiType_** properties from the push notification body. Pass in the **_sessionId_** value to *RNOkaySdk.authorization(SpaAuthorizationData)* method directly as shown in the code snippet below:
+When the push notification is received on the client side, you should retrieve the **_sessionId_** and **_DEVICE_UI_TYPE_** properties from the push notification body. Pass in the **_sessionId_** and **_DEVICE_UI_TYPE_** value to **RNOkaySdk.startAuthorization(spaAuthData: SpaAuthData)** method directly as shown in the code snippet below:
 
 ```javascript
 import messaging from '@react-native-firebase/messaging';
