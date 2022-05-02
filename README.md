@@ -310,7 +310,7 @@ messaging().getToken().then(token => {
 ```
 
 
-### **Authorizing a User's Action**
+### **Authorizing a user's transaction**
 When there is a transaction that needs to be authorized by your application, Okay sends a push notification to your mobile app with the transaction details needed to complete that request. The body of the push notification has the following fields as it payload:
 
 ```json
