@@ -142,7 +142,7 @@ We will need to call the initOkay(object) on the SDK to properly initialize the 
   })
 ```
 ### **Using Custom Fonts With Okay Flutter based UI**
-In other to be able to your custom font with the Okay React Native module, you will be required to add your fonts manually to your app.
+In order to be able to use your custom font with the Okay React Native module, you will be required to add your fonts manually to your app.
 i.e you will be required to bundle the font file as part of your application either as assets in the Android app or adding the fonts
 as part of your iOS bundle. When you have successfully added the font to the native part of your app, you can now add the font configuration to the
 Okay initialisation method as can be seen below.
@@ -218,7 +218,7 @@ PushNotificationIOS.addEventListener('register', token => {
 ```
 
 ### **Update Okay with Token received from Firebase (Android and iOS)**
-You will need to update Okay with the push notification token for the Android or Firebase
+You will need to update Okay with the push notification token for an Android device or Firebase
 registration token generated for the iOS device.
 
 #### Firebase
@@ -233,7 +233,7 @@ messaging().getToken().then(token => {
 ```
 
 ### **How to enroll a user**
-If the required permissions have been granted on the device, we can now proceed to enrolling the user. Okay SDK provides the *startEnrollment(enrollData: SpaEnrollData)* method which takes a Json with "SpaEnrollData" as key.
+If the required permissions have been granted on the device, we can now proceed to enrolling the user. Okay SDK provides the *startEnrollment(enrollData: SpaEnrollData)* method which takes a JSON SpaEnrollData object.
 
 ```javascript
 import messaging from '@react-native-firebase/messaging';
@@ -257,7 +257,7 @@ SpaEnrollData contains several keys that are required for a secure communication
 
 *"appPns"*: This is your push notification token from Firebase(or Firebase registration token for iOS devices if you are using Firebase for push notification on iOS) or APNS token if you are using APNS. This allows us to send 2FA notifications to your apps.
 
-*"installationId"*: The installationId is a unique value that identifies unique installation keys for the Okay SDK in an app. For testing purposes we ask our users to use this value **9990** as their installationId
+*"installationId"*: The installationId is a unique value that identifies unique installation keys for the Okay SDK in an app. For testing purposes we ask our users to use this value **9990** as their installationId on Android and **9980** on iOS.
 
 *"pubPss"*: This is a public key we provide to applications that use our SDK for secure communication with the Okay server. For testing purposes we ask our users to use the value below as their *"pubPss"* key.
 
@@ -265,7 +265,7 @@ SpaEnrollData contains several keys that are required for a secure communication
   const pubPssBase64 = 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxgyacF1NNWTA6rzCrtK60se9fVpTPe3HiDjHB7MybJvNdJZIgZbE9k3gQ6cdEYgTOSG823hkJCVHZrcf0/AK7G8Xf/rjhWxccOEXFTg4TQwmhbwys+sY/DmGR8nytlNVbha1DV/qOGcqAkmn9SrqW76KK+EdQFpbiOzw7RRWZuizwY3BqRfQRokr0UBJrJrizbT9ZxiVqGBwUDBQrSpsj3RUuoj90py1E88ExyaHui+jbXNITaPBUFJjbas5OOnSLVz6GrBPOD+x0HozAoYuBdoztPRxpjoNIYvgJ72wZ3kOAVPAFb48UROL7sqK2P/jwhdd02p/MDBZpMl/+BG+qQIDAQAB'
  ```
 
-*"pageTheme"*: This is a JSON object that allows you to customize the colors for our enrollment and authorization screens to suit your product branding. [Click here to see all valid color properties](https://github.com/Okaythis/okay-sdk-android/wiki/PageTheme-(Android))
+*"pageTheme"*: This is a JSON object that allows you to customize the colors for our enrollment and authorization **native** screens to suit your product branding. This properties may not be applicable to the Flutter UI templates [Click here to see all valid color properties](https://github.com/Okaythis/okay-sdk-android/wiki/PageTheme-(Android))
 
 
 ### **How to link a user**
@@ -339,7 +339,7 @@ Push Notification Sample:
   }
 ```
 
-When the push notification is received on the client side, you should retrieve the **_sessionId_** and **_DEVICE_UI_TYPE_** properties from the push notification body. Pass in the **_sessionId_** and **_DEVICE_UI_TYPE_** value to **RNOkaySdk.startAuthorization(spaAuthData: SpaAuthData)** method directly as shown in the code snippet below:
+When the push notification is received on the client side, you should retrieve the **_sessionId_** and **_DEVICE_UI_TYPE_** properties from the push notification body. Pass in the **_sessionId_** and **_DEVICE_UI_TYPE_** value to **RNOkaySdk.startAuthorization(spaAuthData: SpaAuthData)** method as shown in the code snippet below:
 
 ```javascript
 import messaging from '@react-native-firebase/messaging';
