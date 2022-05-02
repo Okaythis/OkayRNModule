@@ -175,7 +175,7 @@ export interface FontVariants {
 }
 ```
 
-The font datatype consists the following properties:
+The FontVariant datatype consists of the following properties:
 
 - **fontVariant**: The font variant is made up of the name of the font followed by an underscore, the size and the style of the font.
 
