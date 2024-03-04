@@ -6,6 +6,7 @@ import {
   Text,
   SafeAreaView,
   TextInput,
+  ActivityIndicator,
   TouchableOpacity,
   Platform,
 } from 'react-native';
@@ -22,10 +23,14 @@ import {
 } from 'react-native-okay-sdk';
 
 import messaging from '@react-native-firebase/messaging';
+import { useEffect, useState } from 'react';
+// import firebase from '@react-native-firebase/app';
 
 let installationID = Platform.OS === 'android' ? '9990' : '9980';
 const pubPssBase64 =
   'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxgyacF1NNWTA6rzCrtK60se9fVpTPe3HiDjHB7MybJvNdJZIgZbE9k3gQ6cdEYgTOSG823hkJCVHZrcf0/AK7G8Xf/rjhWxccOEXFTg4TQwmhbwys+sY/DmGR8nytlNVbha1DV/qOGcqAkmn9SrqW76KK+EdQFpbiOzw7RRWZuizwY3BqRfQRokr0UBJrJrizbT9ZxiVqGBwUDBQrSpsj3RUuoj90py1E88ExyaHui+jbXNITaPBUFJjbas5OOnSLVz6GrBPOD+x0HozAoYuBdoztPRxpjoNIYvgJ72wZ3kOAVPAFb48UROL7sqK2P/jwhdd02p/MDBZpMl/+BG+qQIDAQAB';
+
+let appAPNT= ''
 
 async function requestUserPermission(callback: (token: string) => void) {
   const authStatus = await messaging().requestPermission();
@@ -40,6 +45,7 @@ async function requestUserPermission(callback: (token: string) => void) {
         console.log('token: ', token);
         updateDeviceToken(token || '');
         callback(token);
+        appAPNT = token;
       });
   }
 }
@@ -48,7 +54,7 @@ async function initSdk(callback: (token: string) => void) {
   try {
     requestUserPermission(callback);
     const response = await initOkay({
-      okayUrlEndpoint: 'https://demostand.okaythis.com',
+      okayUrlEndpoint: 'https://stage.okaythis.com',
       resourceProvider: {
         iosBiometricAlertReasonText: 'Test Alert',
       },
@@ -65,16 +71,78 @@ export default function App() {
   const [tenantId, setTenantId] = React.useState<number>();
   const [deviceToken, setDeviceToken] = React.useState('');
   const [externalId, setExternalId] = React.useState('');
+  const [showLoader, setShowLoader] = useState(false);
+
 
   React.useEffect(() => {
-    initSdk(setDeviceToken);
-    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+
+    // const timeoutId = setTimeout(() => {
+    //   setShowLoader(false);
+    // }, 400);
+
+    initSdk(setDeviceToken).catch(e => `${e}`);
+    messaging().onMessage(async (remoteMessage) => {
       console.log('A new FCM message received!', remoteMessage.data?.data);
-      const id = JSON.parse(remoteMessage?.data?.data ?? '')?.sessionId;
+      setShowLoader(true)
+      const timeoutId =  setTimeout(() => {
+        setShowLoader(false);
+      }, 400);
+      const data = JSON.parse(remoteMessage?.data?.data as string);
+      const id = data?.sessionId;
+      console.log(deviceToken);
       setSessionId(id?.toString() ?? '');
+      let response = await startAuthorization({
+        deviceUiType: data.params.DEVICE_UI_TYPE,
+        sessionId: data.sessionId,
+        appPns: appAPNT,
+        pageTheme: {
+          screenBackgroundColor: '#ffffff',
+          actionBarBackgroundColor: '#004ba0',
+          actionBarTextColor: '#ffd95a',
+          pinNumberButtonTextColor: '#000000',
+          pinNumberButtonBackgroundColor: '#ffd95a',
+          pinRemoveButtonBackgroundColor: '#ffd95a',
+          pinRemoveButtonTextColor: '#000000',
+          pinTitleTextColor: '#ffffff',
+          pinValueTextColor: '#ffffff',
+          titleTextColor: '#ffd95a',
+          questionMarkColor: '#63a4ff',
+          transactionTypeTextColor: '#000000',
+          authInfoBackgroundColor: '#ffd95a',
+          infoSectionTitleColor: '#ffffff',
+          infoSectionValueColor: '#000000',
+          fromTextColor: '#000000',
+          messageTextColor: '#000000',
+          confirmButtonBackgroundColor: '#ffd95a',
+          confirmButtonTextColor: '#000000',
+          cancelButtonBackgroundColor: '#63a4ff',
+          cancelButtonTextColor: '#ffffff',
+          authConfirmationButtonBackgroundColor: '#f9a825',
+          authConfirmationButtonTextColor: '#000000',
+          authCancellationButtonBackgroundColor: '#1976d2',
+          authCancellationButtonTextColor: '#ffffff',
+          nameTextColor: '#000000',
+          buttonBackgroundColor: '#ffffff',
+          buttonTextColor: '#ffffff',
+          inputTextColor: '#000000',
+          inputSelectionColor: '#00FF00',
+          inputErrorColor: '#FF0000',
+          inputDefaultColor: '#888888',
+          tenantName: '',
+          tenantLogoPath: ''
+        },
+      }).catch(e => {
+        console.log(e)
+      });
+      console.log(response);
+      clearTimeout(timeoutId)
+      setShowLoader(false)
     });
 
-    return unsubscribe;
+    return () => {
+      // clearTimeout(timeoutId)
+      // return unsubscribe
+    };
   }, []);
 
   const onLinkTenantClick = () => {
@@ -87,6 +155,7 @@ export default function App() {
       .then(({ linkingSuccessStatus, tenantId }: OkayLinkResponse) => {
         if (linkingSuccessStatus) {
           setTenantId(tenantId);
+          console.log(`linking status: ${linkingSuccessStatus}`)
         }
       })
       .catch(console.error);
@@ -114,15 +183,18 @@ export default function App() {
     startEnrollment({
       appPns: deviceToken,
       pubPss: pubPssBase64,
+      enrollInBackground: true,
       installationId: installationID,
     }).then((response) => {
       setExternalId(response.externalId);
+      console.log(response)
     });
   };
 
+
   return (
     <SafeAreaView>
-      <View style={styles.container}>
+      {showLoader ? Loader() : <View style={styles.container}>
         <TouchableOpacity style={styles.button} onPress={onEnrollClick}>
           <Text style={styles.buttonText}>Enroll device</Text>
         </TouchableOpacity>
@@ -163,10 +235,20 @@ export default function App() {
         <TouchableOpacity style={styles.button} onPress={isEnrolled}>
           <Text style={styles.buttonText}>isEnrolled</Text>
         </TouchableOpacity>
-      </View>
+      </View>}
     </SafeAreaView>
   );
 }
+
+const Loader = () => {
+  return (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+          <Text>Loading...</Text>
+        </View>
+  );
+};
+
 
 const styles = StyleSheet.create({
   container: {
@@ -193,5 +275,17 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     alignSelf: 'center',
+  },
+
+  loader_container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loaderContainer: {
+    alignItems: 'center',
+  },
+  contentContainer: {
+    alignItems: 'center',
   },
 });

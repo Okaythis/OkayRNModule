@@ -12,7 +12,7 @@ class OkayRNExceptionLogger : ExceptionLogger {
     if (!TextUtils.isEmpty(message)) {
       Timber.i("identificator", message)
     }
-    Timber.i("identificator", "error")
+    Timber.i("identificator", exception)
   }
 
   override fun setUserIdentificator(identificator: String?) {

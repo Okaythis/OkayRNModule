@@ -3,6 +3,7 @@ package com.reactnativeokaysdk.resourceprovider
 import android.content.Context
 import android.text.SpannableStringBuilder
 import android.view.View
+import android.view.Window
 import com.protectoria.psa.dex.common.data.dto.gui_data.TransactionInfo
 import com.protectoria.psa.dex.common.ui.ResourceProvider
 
@@ -95,7 +96,11 @@ class OkayResourceProvider(
         return provideTextForAuthorizationProgressView
     }
 
-    override fun provideSplashView(): View {
+  override fun provideTextForInvalidPinRetryErrorText(): String {
+    return "You entered an incorrect PIN"
+  }
+
+  override fun provideSplashView(p0: Context?): View? {
         return View(context)
     }
 
@@ -103,7 +108,9 @@ class OkayResourceProvider(
         return "#000000"
     }
 
-    companion object {
+  override fun customizeWindow(p0: Window?) {}
+
+  companion object {
         const val BiometricPromptCancelButton =
             "cancelButtonText";
         const val EnrollmentDescription =

@@ -481,14 +481,73 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
 
 
   private fun initPageTheme(pageThemeMap: ReadableMap?, promise: Promise): PageTheme {
-    val mapper = ObjectMapper()
-    var pageTheme: PageTheme = DefaultPageTheme.getDefaultPageTheme(reactContext);
-    try {
-      pageTheme = mapper.convertValue(toMap(pageThemeMap), PageTheme::class.java)
-    } catch (e: Exception) {
-      Timber.d(e)
-      promise.reject("", "Invalid object property")
-    }
+    val pageTheme: PageTheme = PageTheme();
+//    val mapper = ObjectMapper()
+//    var pageTheme: PageTheme = DefaultPageTheme.getDefaultPageTheme(reactContext);
+//    try {
+//      pageTheme = mapper.convertValue(toMap(pageThemeMap), PageTheme::class.java)
+//    } catch (e: Exception) {
+//      Timber.d(e)
+//      promise.reject("", "Invalid object property")
+//    }
+
+//    val map = toMap(pageThemeMap) as Map<String, Any?>
+//    val actionBarBackgroundColor: String? = map["actionBarBackgroundColor"]
+//    val actionBarTextColor: String? = map["actionBarTextColor"]
+//    val buttonTextColor: String? = map["buttonTextColor"]
+//    val paymentDetailsButtonTextColor: String? = map["paymentDetailsButtonTextColor"]
+//    val buttonBackgroundColor: String? = map["buttonBackgroundColor"]
+    val screenBackgroundColor: String? = pageThemeMap?.getString("screenBackgroundColor")
+//    val progressColor: String? = map["progressColor"]
+//    val progressMessageTextColor: String? = map["progressMessageTextColor"]
+//    val nameTextColor: String? = map["nameTextColor"]
+//    val titleTextColor: String? = map["titleTextColor"]
+//    val messageTextColor: String? = map["messageTextColor"]
+//    val inputTextColor: String? = map["inputTextColor"]
+//    val inputSelectionColor: String? = map["inputSelectionColor"]
+//    val inputErrorColor: String? = map["inputErrorColor"]
+//    val inputDefaultColor: String? = map["inputDefaultColor"]
+//    val questionMarkColor: String? = map["questionMarkColor"]
+//    val transactionTypeTextColor: String? = map["transactionTypeTextColor"]
+//    val infoSectionTitleColor: String? = map["infoSectionTitleColor"]
+//    val infoSectionValueColor: String? = map["infoSectionValueColor"]
+//    val infoSectionValueSecondaryColor: String? = map["infoSectionValueSecondaryColor"]
+//    val fromTextColor: String? = map["fromTextColor"]
+//    val authInfoBackgroundColor: String? = map["authInfoBackgroundColor"]
+//    val showDetailsTextColor: String? = map["showDetailsTextColor"]
+//    val confirmButtonBackgroundColor: String? = map["confirmButtonBackgroundColor"]
+//    val confirmButtonTextColor: String? = map["confirmButtonTextColor"]
+//    val cancelButtonBackgroundColor: String? = map["cancelButtonBackgroundColor"]
+//    val cancelButtonTextColor: String? = map["cancelButtonTextColor"]
+//    val authConfirmationBackgroundColor: String? = map["authConfirmationBackgroundColor"]
+//    val authConfirmationTitleColor: String? = map["authConfirmationTitleColor"]
+//    val authConfirmationMessageColor: String? = map["authConfirmationMessageColor"]
+//    val authConfirmationThumbColor: String? = map["authConfirmationThumbColor"]
+//    val authConfirmationApostropheColor: String? = map["authConfirmationApostropheColor"]
+//    val authConfirmationButtonBackgroundColor: String? = map["authConfirmationButtonBackgroundColor"]
+//    val authConfirmationButtonTextColor: String? = map["authConfirmationButtonTextColor"]
+//    val authCancellationBackgroundColor: String? = map["authCancellationBackgroundColor"]
+//    val authCancellationTitleColor: String? = map["authCancellationTitleColor"]
+//    val authCancellationMessageColor: String? = map["authCancellationMessageColor"]
+//    val authCancellationThumbColor: String? = map["authCancellationThumbColor"]
+//    val authCancellationApostropheColor: String? = map["authCancellationApostropheColor"]
+//    val authCancellationButtonBackgroundColor: String? = map["authCancellationButtonBackgroundColor"]
+//    val authCancellationButtonTextColor: String? = map["authCancellationButtonTextColor"]
+//    val pinTitleTextColor: String? = map["pinTitleTextColor"]
+//    val pinFilledValueTextColor: String? = map["pinFilledValueTextColor"]
+//    val pinValueTextColor: String? = map["pinValueTextColor"]
+//    val pinNumberButtonTextColor: String? = map["pinNumberButtonTextColor"]
+//    val pinNumberButtonBackgroundColor: String? = map["pinNumberButtonBackgroundColor"]
+//    val pinRemoveButtonTextColor: String? = map["pinRemoveButtonTextColor"]
+//    val pinRemoveButtonBackgroundColor: String? = map["pinRemoveButtonBackgroundColor"]
+//    val sessionTimerProgressColor: String? = map["sessionTimerProgressColor"]
+//    val sessionTimerTextColor: String? = map["sessionTimerTextColor"]
+
+    pageTheme.tenantLogoPath = ""
+    pageTheme.tenantName = ""
+
+
+    pageTheme.setColor(PageTheme.SCREEN_BACKGROUND_COLOR, Color.parseColor(screenBackgroundColor))
     return pageTheme
   }
 

@@ -2,9 +2,9 @@
 
 buildscript {
     ext {
-        minSdkVersion = 16
-        compileSdkVersion = 29
-        targetSdkVersion = 29
+        minSdkVersion = 22
+        compileSdkVersion =  33
+        targetSdkVersion =  33
     }
     repositories {
         google()
@@ -12,8 +12,8 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:3.5.3")
-
+        classpath("com.android.tools.build:gradle:7.4.2")
+       classpath 'com.google.gms:google-services:4.4.1'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -35,5 +35,25 @@ allprojects {
         mavenCentral()
         jcenter()
         maven { url 'https://www.jitpack.io' }
+
+      maven {
+        url "https://gitlab.okaythis.com/api/v4/projects/15/packages/maven"
+        name "GitLab"
+      }
+      maven {
+        url 'https://storage.googleapis.com/download.flutter.io'
+      }
     }
+}
+
+subprojects {
+  afterEvaluate { project ->
+    if (project.hasProperty('android')) {
+      project.android {
+        if (namespace == null) {
+          namespace project.group
+        }
+      }
+    }
+  }
 }

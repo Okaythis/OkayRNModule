@@ -10,16 +10,17 @@
     "bundle": "react-native bundle --dev false --entry-file index.tsx --bundle-output ios/main.jsbundle --platform ios"
   },
   "dependencies": {
-    "@react-native-community/push-notification-ios": "^1.10.1",
-    "@react-native-firebase/app": "^13.0.1",
-    "@react-native-firebase/messaging": "^13.0.1",
-    "react": "16.13.1",
-    "react-native": "0.63.4"
+    "@react-native-community/push-notification-ios": "^1.11.0",
+    "@react-native-firebase/app": "^19.0.0",
+    "@react-native-firebase/messaging": "^19.0.0",
+    "react": "18.2.0",
+    "react-native": "0.73.5"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.10",
-    "@babel/runtime": "^7.12.5",
-    "babel-plugin-module-resolver": "^4.0.0",
-    "metro-react-native-babel-preset": "^0.64.0"
+    "@babel/core": "^7.24.0",
+    "@babel/runtime": "^7.24.0",
+    "@react-native/metro-config": "^0.72.12",
+    "babel-plugin-module-resolver": "^5.0.0",
+    "metro-react-native-babel-preset": "^0.77.0"
   }
 }
