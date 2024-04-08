@@ -38,6 +38,12 @@ class OkayResourceProvider(
 
     override fun provideScreenshotsNotificationIconId(): Int {
         return provideScreenshotsNotificationIconId
+      val resources = context!!.applicationContext.resources
+      return resources.getIdentifier(
+        "ic_menu_camera",
+        "drawable",
+        context!!.applicationContext!!.packageName
+      )
     }
 
     override fun provideTextForFee(): String {

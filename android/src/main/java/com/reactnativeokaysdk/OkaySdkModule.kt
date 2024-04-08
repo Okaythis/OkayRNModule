@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import com.facebook.react.bridge.*
@@ -21,11 +22,15 @@ import com.okaythis.fccabstractcore.interfaces.data.AbstractFlutterEngineDepende
 import com.okaythis.fccabstractcore.interfaces.fcc.FccApi
 import com.okaythis.fccabstractcore.interfaces.parcel.Parcel
 import com.okaythis.fluttercommunicationchannel.fcc.FccApiImpl
+import com.protectoria.psa.LoginListener
 import com.protectoria.psa.PsaManager
 import com.protectoria.psa.api.PsaConstants
 import com.protectoria.psa.api.converters.PsaIntentUtils
+import com.protectoria.psa.api.entities.PsaErrorData
 import com.protectoria.psa.api.entities.SpaAuthorizationData
 import com.protectoria.psa.api.entities.SpaEnrollData
+import com.protectoria.psa.api.entities.TenantInfoData
+import com.protectoria.psa.dex.common.data.dto.AttestationRequest
 import com.protectoria.psa.dex.common.data.enums.PsaType
 import com.protectoria.psa.dex.common.data.json.PsaGsonFactory
 import com.protectoria.psa.dex.common.ui.PageTheme
@@ -33,11 +38,13 @@ import com.protectoria.psa.dex.design.DefaultPageTheme
 import com.protectoria.psa.dex.ui.texts.TransactionResourceProvider
 import com.protectoria.psa.scenarios.enroll.EnrollResultListener
 import com.protectoria.psa.scenarios.transaction.TransactionResultListener
+import com.protectoria.pss.dto.notification.DeviceUIType
 import com.reactnativeokaysdk.logger.OkayRNExceptionLogger
 import com.reactnativeokaysdk.resourceprovider.OkayResourceProvider
 import com.reactnativeokaysdk.storage.SpaStorageImpl
 import com.reactnativeokaysdk.utils.getBooleanOrNull
 import com.reactnativeokaysdk.utils.getIntOrNull
+import io.flutter.plugin.common.MethodCall
 import org.json.JSONObject
 import timber.log.Timber
 
@@ -364,7 +371,11 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
 
     val sessionId = data.getIntOrNull("sessionId")
     val appPNS = data.getString("appPns")
-    val deviceUiType = data.getString("deviceUiType")
+    val clientServerUrl = data.getString("clientServerUrl") ?: ""
+    val extSessionId = data.getString("extSessionId") ?: ""
+    val userExternalId = data.getString("userExternalId") ?: ""
+    val isDisableMultipleRetry = data.getBooleanOrNull("isDisableMultipleRetry") ?: true
+    val deviceUiType = data.getString("deviceUiType") ?: "FLUTTER"
     val pageThemeMap = data.getMap("pageTheme")
     val psaType = PsaType.OKAY
 
@@ -394,12 +405,14 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
 
     takeIf { sessionId !== null && appPNS !== null }
       ?.run {
+        val uiType = if(deviceUiType == "FLUTTER") DeviceUIType.FLUTTER else DeviceUIType.NATIVE
         val authorizationData: SpaAuthorizationData = if (pageThemeMap != null) {
           val pageTheme = initPageTheme(pageThemeMap, promise)
-          SpaAuthorizationData(sessionId!!.toLong(), appPNS, pageTheme, psaType)
+          SpaAuthorizationData(clientServerUrl, extSessionId, userExternalId, sessionId!!.toLong(), isDisableMultipleRetry, appPNS, pageTheme, psaType, uiType)
         } else {
-          SpaAuthorizationData(sessionId!!.toLong(), appPNS, null, psaType)
+          SpaAuthorizationData(clientServerUrl, extSessionId, userExternalId, sessionId!!.toLong(), isDisableMultipleRetry, appPNS, null, psaType, uiType)
         }
+
         if (deviceUiType == "FLUTTER") {
           PsaManager.getInstance().startAuthorizationWithAbstractUI(activity, authorizationData, resultListener)
           return
@@ -497,7 +510,7 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
 //    val buttonTextColor: String? = map["buttonTextColor"]
 //    val paymentDetailsButtonTextColor: String? = map["paymentDetailsButtonTextColor"]
 //    val buttonBackgroundColor: String? = map["buttonBackgroundColor"]
-    val screenBackgroundColor: String? = pageThemeMap?.getString("screenBackgroundColor")
+    val screenBackgroundColor: String? = pageThemeMap?.getString("screenBackgroundColor") ?: "#ffffff"
 //    val progressColor: String? = map["progressColor"]
 //    val progressMessageTextColor: String? = map["progressMessageTextColor"]
 //    val nameTextColor: String? = map["nameTextColor"]
@@ -570,6 +583,75 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
     }
     return result
   }
+  @ReactMethod
+  fun startBiometricLogin(promise: Promise){
+    val loginListener = object: LoginListener {
+      override fun onSuccess(p0: AttestationRequest?) {
+        promise.resolve(
+          Arguments.fromBundle(
+            bundleOf(
+              "biometricLoginStatus" to true,
+              "payload" to p0?.payload.toString(),
+              "header" to p0?.header.toString(),
+              "signature" to p0?.signature.toString(),
+              "protectedAlgo" to p0?.protectedAlgo.toString()
+            )
+          )
+        )
+      }
+
+      override fun onError(p0: PsaErrorData?) {
+        promise.resolve(
+          Arguments.fromBundle(
+            bundleOf(
+              "biometricLoginStatus" to false,
+              "status" to p0?.status?.code,
+              "message" to p0?.message.toString(),
+              "sessionRemainingSeconds" to p0?.sessionRemainingSeconds,
+            )
+          )
+        )
+      }
+    }
+    PsaManager.getInstance().startBiometricLogin(reactContext!!.currentActivity, loginListener)
+  }
+  @ReactMethod
+  fun startPINLogin(data: ReadableMap, promise: Promise){
+    val publicKeyInBase64: String? = data.getString("publicKeyInBase64")
+    val clientVerificationServerURL: String? = data.getString("clientVerificationServerURL")
+    val wrongPinRetries: Int = data.getInt("wrongPinRetries") ?: 3
+    val userExternalId: String? = data.getString("userExternalId")
+
+    val loginListener = object: LoginListener {
+      override fun onSuccess(p0: AttestationRequest?) {
+        promise.resolve(
+          Arguments.fromBundle(
+            bundleOf(
+              "pinLoginStatus" to true,
+              "payload" to p0?.payload,
+              "header" to p0?.header,
+              "signature" to p0?.signature,
+              "protectedAlgo" to p0?.protectedAlgo
+            )
+          )
+        )
+      }
+
+      override fun onError(p0: PsaErrorData?) {
+        promise.resolve(
+          Arguments.fromBundle(
+            bundleOf(
+              "pinLoginStatus" to false,
+              "statusCode" to p0?.status?.code,
+              "message" to p0?.message,
+            )
+          )
+        )
+      }
+    }
+    PsaManager.getInstance().startPinLogin(reactContext!!.currentActivity, publicKeyInBase64, clientVerificationServerURL, wrongPinRetries, userExternalId, loginListener)
+  }
+
 
   private fun parseEnrollmentData(data: Intent): WritableNativeMap {
     val psaEnrollResultData = PsaIntentUtils.enrollResultFromIntent(data)
@@ -581,7 +663,7 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
 
 
   private fun getString(map: ReadableMap?, key: String): String {
-    return if (map?.getString(key).isNullOrBlank()) "" else map?.getString(key)!!
+    return if (map?.getString(key).isNullOrBlank()) key else map?.getString(key)!!
   }
 
   private fun getResourceId(id: String): Int {

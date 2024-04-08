@@ -13,6 +13,8 @@ class OkayRNExceptionLogger : ExceptionLogger {
       Timber.i("identificator", message)
     }
     Timber.i("identificator", exception)
+
+    Log.d("DTLogger", exception.toString())
   }
 
   override fun setUserIdentificator(identificator: String?) {

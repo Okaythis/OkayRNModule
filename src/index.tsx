@@ -116,7 +116,11 @@ export interface SpaEnrollData {
 export interface SpaAuthData {
   deviceUiType: string;
   sessionId: number;
-  appPns?: string;
+  extSessionId: string;
+  clientServerUrl: string;
+  userExternalId: string;
+  isDisableMultipleRetry: boolean;
+  appPns: string;
   pageTheme?: PSATheme;
 }
 export interface SpaStorageData {
@@ -148,6 +152,34 @@ export interface OkayLinkResponse {
 
 export interface OkayUnLinkResponse {
   unlinkingSuccessStatus: boolean;
+}
+
+export interface OkayBiometricLoginResponse {
+  biometricLoginStatus: boolean;
+  payload?: string;
+  header?: string;
+  signature?: string;
+  protectedAlgo?: string;
+  status?: string;
+  message?: string;
+  sessionRemainingSeconds?: number;
+}
+
+export interface OkayPINLogin {
+  publicKeyInBase64: string;
+  clientVerificationServerURL: string;
+  wrongPinRetries: number;
+  userExternalId: string;
+}
+
+export interface OkayPINLoginResponse {
+  pinLoginStatus: boolean;
+  payload?: string;
+  header?: string;
+  signature?: string;
+  protectedAlgo?: string;
+  statusCode?: number;
+  message?: string;
 }
 
 export function initOkay(initData: InitData): Promise<OkayInitResponse> {
@@ -188,4 +220,12 @@ export function startAuthorization(
   spaAuthData: SpaAuthData
 ): Promise<OkayAuthResponse> {
   return OkaySdk.startAuthorization(spaAuthData);
+}
+
+export function startBiometricLogin(): Promise<OkayBiometricLoginResponse> {
+  return OkaySdk.startBiometricLogin();
+}
+
+export function startPINLogin(loginData: OkayPINLogin): Promise<OkayPINLoginResponse> {
+  return OkaySdk.startPINLogin(loginData);
 }

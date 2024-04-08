@@ -19,7 +19,7 @@ import {
   unlinkTenant,
   updateDeviceToken,
   OkayLinkResponse,
-  initOkay,
+  initOkay, startBiometricLogin, OkayBiometricLoginResponse, OkayPINLoginResponse, startPINLogin,
 } from 'react-native-okay-sdk';
 
 import messaging from '@react-native-firebase/messaging';
@@ -56,7 +56,27 @@ async function initSdk(callback: (token: string) => void) {
     const response = await initOkay({
       okayUrlEndpoint: 'https://stage.okaythis.com',
       resourceProvider: {
-        iosBiometricAlertReasonText: 'Test Alert',
+        androidBiometricPromptSubTitle: "Biometric authorisation",
+        androidConfirmBiometricButtonText: "Authorise",
+        confirmButtonText: "Test",
+        cancelButtonText: "Test",
+        massPaymentDetailsButtonText: "Test",
+        feeLabelText: "Test",
+        recipientLabelText: "Test",
+        enrollmentTitleText: "Test",
+        enrollmentDescriptionText: "Test",
+        androidScreenhotsNotificationIconId: "ic_menu_camera",
+        androidScreenshotsChannelName: "Test",
+        androidTransactionDetails: "Test",
+        androidScreenshotsNotificationText: "Test",
+        androidAuthScreenTitle: "Test",
+        androidBiometricPromptTitle: "Test",
+        androidAuthorizationProgressViewText: "Test",
+        androidBiometricPromptDescription: "Test",
+        iosBiometricAlertReasonText: "Test Alert",
+        iosConfirmBiometricTouchButtonText: "Test",
+        iosConfirmBiometricFaceButtonText: "Test",
+        iosMassPaymentDetailsHeaderText: "Test",
       },
     });
     console.log('Init sdk status: ', response.initStatus);
@@ -89,10 +109,11 @@ export default function App() {
       }, 400);
       const data = JSON.parse(remoteMessage?.data?.data as string);
       const id = data?.sessionId;
-      console.log(deviceToken);
+      console.log(data.params.DEVICE_UI_TYPE);
       setSessionId(id?.toString() ?? '');
       let response = await startAuthorization({
-        deviceUiType: data.params.DEVICE_UI_TYPE,
+        deviceUiType: "NATIVE",
+        // deviceUiType: data.params.DEVICE_UI_TYPE,
         sessionId: data.sessionId,
         appPns: appAPNT,
         pageTheme: {
@@ -161,6 +182,35 @@ export default function App() {
       .catch(console.error);
   };
 
+  const onStartBiometricLoginClick = () => {
+    startBiometricLogin()
+      .then(({ biometricLoginStatus, payload, header, signature, protectedAlgo, status, message, sessionRemainingSeconds }: OkayBiometricLoginResponse) => {
+        if (biometricLoginStatus) {
+          console.log(` ${payload} ${header} ${signature} ${protectedAlgo}`);
+          return;
+        }
+        console.log(` ${status} ${message}`);
+      })
+      .catch(console.error);
+  };
+
+  const onStartPINLoginClick = () => {
+    startPINLogin({
+      publicKeyInBase64: "tyty",
+      clientVerificationServerURL: "http://okay.com",
+      wrongPinRetries: 3,
+      userExternalId: "string",
+    })
+      .then(({ pinLoginStatus, payload, header, signature, protectedAlgo, statusCode, message }: OkayPINLoginResponse) => {
+        if (pinLoginStatus) {
+          console.log(` ${payload} ${header} ${signature} ${protectedAlgo}`);
+          return;
+        }
+        console.log(` ${statusCode} ${message}`);
+      })
+      .catch(console.error);
+  };
+
   const onUnlinkTenantClick = () => {
     if (tenantId) {
       unlinkTenant(tenantId, {
@@ -194,7 +244,7 @@ export default function App() {
 
   return (
     <SafeAreaView>
-      {showLoader ? Loader() : <View style={styles.container}>
+      <View style={styles.container}>
         <TouchableOpacity style={styles.button} onPress={onEnrollClick}>
           <Text style={styles.buttonText}>Enroll device</Text>
         </TouchableOpacity>
@@ -207,6 +257,14 @@ export default function App() {
         <TouchableOpacity style={styles.button} onPress={onLinkTenantClick}>
           <Text style={styles.buttonText}>Link device</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity style={styles.button} onPress={onStartPINLoginClick}>
+          <Text style={styles.buttonText}>PIN Login</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={onStartBiometricLoginClick}>
+          <Text style={styles.buttonText}>Biometric Login</Text>
+        </TouchableOpacity>
+
         <TextInput
           style={styles.textInput}
           keyboardType={'numeric'}
@@ -223,19 +281,19 @@ export default function App() {
         >
           <Text style={styles.buttonText}>isReadyForAuthorization</Text>
         </TouchableOpacity>
-        <TextInput
-          style={styles.textInput}
-          placeholder="Enter session id"
-          value={sessionId}
-          onChangeText={setSessionId}
-        />
-        <TouchableOpacity style={styles.button} onPress={onAuthClick}>
-          <Text style={styles.buttonText}>authorization</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={isEnrolled}>
-          <Text style={styles.buttonText}>isEnrolled</Text>
-        </TouchableOpacity>
-      </View>}
+        {/*<TextInput*/}
+        {/*  style={styles.textInput}*/}
+        {/*  placeholder="Enter session id"*/}
+        {/*  value={sessionId}*/}
+        {/*  onChangeText={setSessionId}*/}
+        {/*/>*/}
+        {/*<TouchableOpacity style={styles.button} onPress={onAuthClick}>*/}
+        {/*  <Text style={styles.buttonText}>authorization</Text>*/}
+        {/*</TouchableOpacity>*/}
+        {/*<TouchableOpacity style={styles.button} onPress={isEnrolled}>*/}
+        {/*  <Text style={styles.buttonText}>isEnrolled</Text>*/}
+        {/*</TouchableOpacity>*/}
+      </View>
     </SafeAreaView>
   );
 }
