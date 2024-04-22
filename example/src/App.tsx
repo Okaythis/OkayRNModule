@@ -58,8 +58,8 @@ async function initSdk(callback: (token: string) => void) {
       resourceProvider: {
         androidBiometricPromptSubTitle: "Biometric authorisation",
         androidConfirmBiometricButtonText: "Authorise",
-        confirmButtonText: "Test",
-        cancelButtonText: "Test",
+        confirmButtonText: "Confirm",
+        cancelButtonText: "Cancel",
         massPaymentDetailsButtonText: "Test",
         feeLabelText: "Test",
         recipientLabelText: "Test",
@@ -69,10 +69,10 @@ async function initSdk(callback: (token: string) => void) {
         androidScreenshotsChannelName: "Test",
         androidTransactionDetails: "Test",
         androidScreenshotsNotificationText: "Test",
-        androidAuthScreenTitle: "Test",
-        androidBiometricPromptTitle: "Test",
+        androidAuthScreenTitle: "Authorise",
+        androidBiometricPromptTitle: "Biometric Title",
         androidAuthorizationProgressViewText: "Test",
-        androidBiometricPromptDescription: "Test",
+        androidBiometricPromptDescription: "Please authenticate this transaction",
         iosBiometricAlertReasonText: "Test Alert",
         iosConfirmBiometricTouchButtonText: "Test",
         iosConfirmBiometricFaceButtonText: "Test",
@@ -91,29 +91,17 @@ export default function App() {
   const [tenantId, setTenantId] = React.useState<number>();
   const [deviceToken, setDeviceToken] = React.useState('');
   const [externalId, setExternalId] = React.useState('');
-  const [showLoader, setShowLoader] = useState(false);
-
 
   React.useEffect(() => {
-
-    // const timeoutId = setTimeout(() => {
-    //   setShowLoader(false);
-    // }, 400);
-
     initSdk(setDeviceToken).catch(e => `${e}`);
     messaging().onMessage(async (remoteMessage) => {
       console.log('A new FCM message received!', remoteMessage.data?.data);
-      setShowLoader(true)
-      const timeoutId =  setTimeout(() => {
-        setShowLoader(false);
-      }, 400);
       const data = JSON.parse(remoteMessage?.data?.data as string);
       const id = data?.sessionId;
       console.log(data.params.DEVICE_UI_TYPE);
       setSessionId(id?.toString() ?? '');
       let response = await startAuthorization({
-        deviceUiType: "NATIVE",
-        // deviceUiType: data.params.DEVICE_UI_TYPE,
+        deviceUiType: data.params.DEVICE_UI_TYPE,
         sessionId: data.sessionId,
         appPns: appAPNT,
         pageTheme: {
@@ -156,8 +144,6 @@ export default function App() {
         console.log(e)
       });
       console.log(response);
-      clearTimeout(timeoutId)
-      setShowLoader(false)
     });
 
     return () => {
@@ -222,13 +208,6 @@ export default function App() {
     }
   };
 
-  const onAuthClick = () => {
-    startAuthorization({
-      sessionId: Number(sessionId),
-      appPns: deviceToken,
-    });
-  };
-
   const onEnrollClick = () => {
     startEnrollment({
       appPns: deviceToken,
@@ -275,24 +254,6 @@ export default function App() {
         <TouchableOpacity style={styles.button} onPress={onUnlinkTenantClick}>
           <Text style={styles.buttonText}>Unlink tenant</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={isReadyForAuthorization}
-        >
-          <Text style={styles.buttonText}>isReadyForAuthorization</Text>
-        </TouchableOpacity>
-        {/*<TextInput*/}
-        {/*  style={styles.textInput}*/}
-        {/*  placeholder="Enter session id"*/}
-        {/*  value={sessionId}*/}
-        {/*  onChangeText={setSessionId}*/}
-        {/*/>*/}
-        {/*<TouchableOpacity style={styles.button} onPress={onAuthClick}>*/}
-        {/*  <Text style={styles.buttonText}>authorization</Text>*/}
-        {/*</TouchableOpacity>*/}
-        {/*<TouchableOpacity style={styles.button} onPress={isEnrolled}>*/}
-        {/*  <Text style={styles.buttonText}>isEnrolled</Text>*/}
-        {/*</TouchableOpacity>*/}
       </View>
     </SafeAreaView>
   );
