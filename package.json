@@ -1,10 +1,10 @@
 {
-  "name": "react-native-okay-sdk",
+  "name": "rn-okay-sdk",
   "version": "0.1.0",
-  "description": "React-Native Okay SDK",
+  "description": "This is the React Native package for the Okay SDK.",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
-  "types": "lib/typescript/index.d.ts",
+  "types": "lib/typescript/src/index.d.ts",
   "react-native": "src/index",
   "source": "src/index",
   "files": [
@@ -13,64 +13,77 @@
     "android",
     "ios",
     "cpp",
-    "react-native-okay-sdk.podspec",
-    "!lib/typescript/example",
-    "!android/build",
+    "*.podspec",
     "!ios/build",
+    "!android/build",
+    "!android/gradle",
+    "!android/gradlew",
+    "!android/gradlew.bat",
+    "!android/local.properties",
     "!**/__tests__",
     "!**/__fixtures__",
-    "!**/__mocks__"
+    "!**/__mocks__",
+    "!**/.*"
   ],
   "scripts": {
+    "example": "yarn workspace rn-okay-sdk-example",
     "test": "jest",
-    "typescript": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
+    "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "prepare": "bob build",
-    "release": "release-it",
-    "example": "yarn --cwd example",
-    "pods": "cd example && pod-install --quiet",
-    "bootstrap": "yarn example && yarn && yarn pods"
+    "release": "release-it"
   },
   "keywords": [
     "react-native",
     "ios",
     "android"
   ],
-  "repository": "https://github.com/Okaythis",
-  "author": "Okaythis (https://github.com/Okaythis)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Okaythis/rn-okay-sdk.git"
+  },
+  "author": "hello@okaythis.com <hello@okaythis.com> (https://github.com/Okaythis)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Okaythis/issues"
+    "url": "https://github.com/Okaythis/rn-okay-sdk/issues"
   },
-  "homepage": "https://github.com/Okaythis#readme",
+  "homepage": "https://github.com/Okaythis/rn-okay-sdk#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
   "devDependencies": {
-    "@commitlint/config-conventional": "^19.0.3",
-    "@react-native-community/eslint-config": "^3.2.0",
-    "@release-it/conventional-changelog": "^8.0.1",
-    "@types/jest": "^29.5.12",
-    "@types/react": "^18.2.61",
-    "@types/react-native": "0.73.0",
-    "commitlint": "^19.0.3",
-    "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-prettier": "^5.1.3",
-    "husky": "^9.0.11",
+    "@commitlint/config-conventional": "^17.0.2",
+    "@evilmartians/lefthook": "^1.5.0",
+    "@react-native/eslint-config": "^0.73.1",
+    "@release-it/conventional-changelog": "^5.0.0",
+    "@types/jest": "^29.5.5",
+    "@types/react": "^18.2.44",
+    "commitlint": "^17.0.2",
+    "del-cli": "^5.1.0",
+    "eslint": "^8.51.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
     "jest": "^29.7.0",
-    "pod-install": "^0.2.0",
     "prettier": "^3.2.5",
     "react": "18.2.0",
-    "react-native": "0.73.5",
-    "react-native-builder-bob": "^0.23.2",
-    "release-it": "^17.1.1",
-    "typescript": "^5.3.3"
+    "react-native": "0.74.0",
+    "react-native-builder-bob": "^0.20.0",
+    "release-it": "^15.0.0",
+    "turbo": "^1.10.7",
+    "typescript": "^5.2.2"
+  },
+  "resolutions": {
+    "@types/react": "^18.2.44"
   },
   "peerDependencies": {
     "react": "*",
-    "react-native": "0.73.5"
+    "react-native": "*"
   },
+  "workspaces": [
+    "example"
+  ],
+  "packageManager": "yarn@3.6.1",
   "jest": {
     "preset": "react-native",
     "modulePathIgnorePatterns": [
@@ -103,7 +116,7 @@
   "eslintConfig": {
     "root": true,
     "extends": [
-      "@react-native-community",
+      "@react-native",
       "prettier"
     ],
     "rules": {
@@ -143,8 +156,5 @@
         }
       ]
     ]
-  },
-  "dependencies": {
-    "global": "^4.4.0"
   }
 }

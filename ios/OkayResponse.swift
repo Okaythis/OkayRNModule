@@ -102,4 +102,3 @@ public struct OkayInitResponse: OkayResponse {
         self.initStatus = status
     }
 }
-

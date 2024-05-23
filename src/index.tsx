@@ -1,13 +1,13 @@
 import { NativeModules, Platform } from 'react-native';
 
 const LINKING_ERROR =
-  `The package 'react-native-okay-sdk' doesn't seem to be linked. Make sure: \n\n` +
+  `The package 'rn-okay-sdk' doesn't seem to be linked. Make sure: \n\n` +
   Platform.select({ ios: "- You have run 'pod install'\n", default: '' }) +
   '- You rebuilt the app after installing the package\n' +
-  '- You are not using Expo managed workflow\n';
+  '- You are not using Expo Go\n';
 
-const OkaySdk = NativeModules.OkaySdk
-  ? NativeModules.OkaySdk
+const RnOkaySdk = NativeModules.RnOkaySdk
+  ? NativeModules.RnOkaySdk
   : new Proxy(
       {},
       {
@@ -162,7 +162,7 @@ export interface OkayAuthResponse {
 
 export interface OkayLinkResponse {
   linkingSuccessStatus: boolean;
-  tenantId: number;
+  _tenantId: number;
 }
 
 export interface OkayUnLinkResponse {
@@ -198,53 +198,55 @@ export interface OkayPINLoginResponse {
 }
 
 export function initOkay(initData: InitData): Promise<OkayInitResponse> {
-  return OkaySdk.initOkay(initData);
+  return RnOkaySdk.initOkay(initData);
 }
 
 export function updateDeviceToken(token: string): Promise<boolean> {
-  return OkaySdk.updateDeviceToken(token);
+  return RnOkaySdk.updateDeviceToken(token);
 }
 
 export function isEnrolled(): Promise<boolean> {
-  return OkaySdk.isEnrolled();
+  return RnOkaySdk.isEnrolled();
 }
 
 export function linkTenant(
   code: string,
   spaStorageData?: SpaStorageData
 ): Promise<OkayLinkResponse> {
-  return OkaySdk.linkTenant(code, spaStorageData);
+  return RnOkaySdk.linkTenant(code, spaStorageData);
 }
 
 export function unlinkTenant(
   id: number | string,
   spaStorageData?: SpaStorageData
 ): Promise<OkayUnLinkResponse> {
-  return OkaySdk.unlinkTenant(+id, spaStorageData);
+  return RnOkaySdk.unlinkTenant(+id, spaStorageData);
 }
 
 export function startEnrollment(
   enrollData: SpaEnrollData
 ): Promise<OkayEnrollmentResponse> {
-  return OkaySdk.startEnrollment(enrollData);
+  return RnOkaySdk.startEnrollment(enrollData);
 }
 export function isReadyForAuthorization(): Promise<boolean> {
-  return OkaySdk.isReadyForAuthorization();
+  return RnOkaySdk.isReadyForAuthorization();
 }
 export function startAuthorization(
   spaAuthData: SpaAuthData
 ): Promise<OkayAuthResponse> {
-  return OkaySdk.startAuthorization(spaAuthData);
+  return RnOkaySdk.startAuthorization(spaAuthData);
 }
 
 export function startBiometricLogin(): Promise<OkayBiometricLoginResponse> {
-  return OkaySdk.startBiometricLogin(null);
+  return RnOkaySdk.startBiometricLogin(null);
 }
 
 export function setLoginTheme(loginTheme: OkayLoginTheme): Promise<String> {
-  return OkaySdk.setLoginTheme(loginTheme);
+  return RnOkaySdk.setLoginTheme(loginTheme);
 }
 
-export function startPINLogin(loginData: OkayPINLogin): Promise<OkayPINLoginResponse> {
-  return OkaySdk.startPINLogin(loginData);
+export function startPINLogin(
+  pinLoginData: OkayPINLogin
+): Promise<OkayPINLoginResponse> {
+  return RnOkaySdk.startPINLogin(pinLoginData);
 }

@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  OkaySdkExample
+//  RnOkaySdkExample
 //
 
 import Foundation

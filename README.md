@@ -43,11 +43,12 @@ Locate your ***project_dir/android/app/build.gradle*** file in your project work
 ```groovy
 buildscript {
   ext {
-    buildToolsVersion = "28.0.3"
-    minSdkVersion = 21 // use API 21
-    compileSdkVersion = 30
-    targetSdkVersion = 30
-    ndkVersion = "21.4.7075529"
+    buildToolsVersion = "34.0.0"
+    minSdkVersion = 23
+    compileSdkVersion = 34
+    targetSdkVersion = 34
+    ndkVersion = "26.1.10909125"
+    kotlinVersion = "1.9.22"
   }
 }
 ```
