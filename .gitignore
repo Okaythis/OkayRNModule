@@ -66,3 +66,6 @@ android/keystores/debug.keystore
 lib/
 /example/android/java_pid14548.hprof
 /example/android/app/google-services.json
+/example/ios/OkaySdkExample/GoogleService-Info.plist
+/example/ios/.xcode.env
+/example/ios/OkaySdkExample/OkaySdkExample.entitlements

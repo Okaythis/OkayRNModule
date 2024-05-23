@@ -33,4 +33,16 @@ RCT_EXTERN_METHOD(isReadyForAuthorization:(RCTPromiseResolveBlock)resolve
 RCT_EXTERN_METHOD(startAuthorization:(NSDictionary *)spaAuthData
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(startPINLogin:(NSDictionary *)pinLoginData
+                  withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(setLoginTheme:(NSDictionary *)loginTheme
+                  withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(startBiometricLogin:(NSDictionary *)data
+                  withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
 @end

@@ -10,9 +10,8 @@
     "bundle": "react-native bundle --dev false --entry-file index.tsx --bundle-output ios/main.jsbundle --platform ios"
   },
   "dependencies": {
-    "@react-native-community/push-notification-ios": "^1.11.0",
-    "@react-native-firebase/app": "^19.0.0",
-    "@react-native-firebase/messaging": "^19.0.0",
+    "@react-native-firebase/app": "^19.2.2",
+    "@react-native-firebase/messaging": "^19.2.2",
     "react": "18.2.0",
     "react-native": "0.73.5"
   },

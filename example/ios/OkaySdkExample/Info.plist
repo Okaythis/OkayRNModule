@@ -28,6 +28,10 @@
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+		<key>NSAllowsLocalNetworkingUsageDescription</key>
+		<dict/>
 		<key>NSExceptionDomains</key>
 		<dict>
 			<key>localhost</key>
@@ -37,6 +41,8 @@
 			</dict>
 		</dict>
 	</dict>
+  <key>NSFaceIDUsageDescription</key>
+  <string>Authentication with TouchId or FaceID</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
 	<key>UIBackgroundModes</key>

@@ -58,9 +58,48 @@ public struct OkayUnLinkResponse: OkayResponse {
     }
 }
 
+public struct OkayStartBiometricLoginResponse: OkayResponse {
+    let payload: String
+    let protectedAlgo: String
+    let header: String
+    let signature: String
+    let biometricLoginStatus: Bool
+    let statusCode: Int
+
+    init(payload: String, protectedAlgo: String, header: String, signature: String, biometricLoginStatus: Bool, statusCode: Int) {
+        self.payload = payload
+        self.protectedAlgo = protectedAlgo
+        self.header = header
+        self.signature = signature
+        self.biometricLoginStatus = biometricLoginStatus
+        self.statusCode = statusCode
+    }
+}
+
+public struct OkayStartPINLoginResponse: OkayResponse {
+    let payload: String
+    let protectedAlgo: String
+    let header: String
+    let signature: String
+    let biometricLoginStatus: Bool
+    let message: String
+    let statusCode: Int
+
+    init(payload: String, protectedAlgo: String, header: String, signature: String, biometricLoginStatus: Bool, statusCode: Int, message: String) {
+        self.payload = payload
+        self.protectedAlgo = protectedAlgo
+        self.header = header
+        self.signature = signature
+        self.biometricLoginStatus = biometricLoginStatus
+        self.message = message
+        self.statusCode = statusCode
+    }
+}
+
 public struct OkayInitResponse: OkayResponse {
     let initStatus: Bool
     init(status: Bool) {
         self.initStatus = status
     }
 }
+

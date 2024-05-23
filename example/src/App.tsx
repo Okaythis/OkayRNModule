@@ -13,17 +13,14 @@ import {
 import {
   startAuthorization,
   startEnrollment,
-  isEnrolled,
-  isReadyForAuthorization,
   linkTenant,
   unlinkTenant,
   updateDeviceToken,
   OkayLinkResponse,
-  initOkay, startBiometricLogin, OkayBiometricLoginResponse, OkayPINLoginResponse, startPINLogin,
+  initOkay, startBiometricLogin, OkayBiometricLoginResponse, OkayPINLoginResponse, startPINLogin, setLoginTheme,
 } from 'react-native-okay-sdk';
 
 import messaging from '@react-native-firebase/messaging';
-import { useEffect, useState } from 'react';
 // import firebase from '@react-native-firebase/app';
 
 let installationID = Platform.OS === 'android' ? '9990' : '9980';
@@ -79,6 +76,20 @@ async function initSdk(callback: (token: string) => void) {
         iosMassPaymentDetailsHeaderText: "Test",
       },
     });
+    await setLoginTheme({
+      pinTitleText: "Login Title",
+      pinSubTitleText: "Enter PIN to login",
+      forgotPinText: "Forgot PIN?",
+      pinScreenBackgroundColor: "#ffffff",
+      pinTitleTextColor: "#ffd95a",
+      pinSubTitleTextColor: "#ffd95a",
+      pinFilledColor: "#ffd95a",
+      pinPadTextColor: '#ffffff',
+      pinPadBackgroundColor: '#ffffff',
+      pinSubTitleErrorText: "You entered a wrong PIN. Please try again",
+      severErrorText: "There was an error validating your PIN",
+      shuffleKeyPad: false,
+    });
     console.log('Init sdk status: ', response.initStatus);
   } catch (error) {
     console.error('Error init sdk', error);
@@ -101,6 +112,10 @@ export default function App() {
       console.log(data.params.DEVICE_UI_TYPE);
       setSessionId(id?.toString() ?? '');
       let response = await startAuthorization({
+        clientServerUrl: '',
+        extSessionId: '',
+        isDisableMultipleRetry: false,
+        userExternalId: '',
         deviceUiType: data.params.DEVICE_UI_TYPE,
         sessionId: data.sessionId,
         appPns: appAPNT,

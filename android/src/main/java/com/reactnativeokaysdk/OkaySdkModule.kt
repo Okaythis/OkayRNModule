@@ -584,7 +584,7 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
     return result
   }
   @ReactMethod
-  fun startBiometricLogin(promise: Promise){
+  fun startBiometricLogin(readableMap: ReadableMap?, promise: Promise){
     val loginListener = object: LoginListener {
       override fun onSuccess(p0: AttestationRequest?) {
         promise.resolve(
@@ -613,7 +613,11 @@ class OkaySdkModule(reactContext: ReactApplicationContext) :
         )
       }
     }
-    PsaManager.getInstance().startBiometricLogin(reactContext!!.currentActivity, loginListener)
+
+    val h = Handler(Looper.getMainLooper());
+    h.post {
+      PsaManager.getInstance().startBiometricLogin(reactContext!!.currentActivity, loginListener)
+    }
   }
   @ReactMethod
   fun startPINLogin(data: ReadableMap, promise: Promise){

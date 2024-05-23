@@ -99,10 +99,7 @@ android {
     sourceCompatibility JavaVersion.VERSION_1_8
     targetCompatibility JavaVersion.VERSION_1_8
   }
-  // Begin Add DataBinding
-  dataBinding {
-    enabled = true
-  }
+
   // End
   defaultConfig {
     ...
@@ -123,14 +120,17 @@ Please visit this link to enable Push Notification for iOS devices when using Re
 
 
 ## **API Usage**
-- initOkay(initData: InitData): Promise<string> (Android Only)
-- updateDeviceToken(token: string): void (iOS only)
-- isEnrolled(): boolean
-- startEnrollment(enrollData: SpaEnrollData): Promise<string>;
-- linkTenant(code: string, spaStorageData?: SpaStorageData): Promise<string>;
-- unlinkTenant(id: number | string, spaStorageData?: SpaStorageData): Promise<string>;
-- isReadyForAuthorization(): Promise<string>;
-- startAuthorization(spaAuthData: SpaAuthData): Promise<string>;
+- initOkay(initData: InitData): Promise<OkayInitResponse> (Android Only)
+- updateDeviceToken(token: string): Promise<boolean> (iOS only)
+- linkTenant(code: string, spaStorageData?: SpaStorageData): Promise<OkayLinkResponse>;
+- unlinkTenant(id: number | string, spaStorageData?: SpaStorageData): Promise<OkayUnLinkResponse>;
+- isEnrolled(): Promise<boolean>
+- startEnrollment(enrollData: SpaEnrollData): Promise<OkayEnrollmentResponse>
+- isReadyForAuthorization(): Promise<boolean>;
+- startAuthorization(spaAuthData: SpaAuthData): Promise<OkayAuthResponse>;
+- startPINLogin(loginData: OkayPINLogin): Promise<OkayPINLoginResponse>
+- startBiometricLogin(): Promise<OkayBiometricLoginResponse>
+- setLoginTheme(loginTheme: OkayLoginTheme): Promise<String>
 
 ### **SDK Initialization:**
 
@@ -196,7 +196,6 @@ import messaging from '@react-native-firebase/messaging';
   if (enabled) {
     console.log('Authorization status:', authStatus);
     messaging().getToken().then(token => {
-      console.log('token: ', token);
       OkaySdk.updateDeviceToken(token || '');
     })
   }
@@ -227,7 +226,6 @@ registration token generated for the iOS device.
 import messaging from '@react-native-firebase/messaging';
 
 messaging().getToken().then(token => {
-    console.log('token: ', token);
     OkaySdk.updateDeviceToken(token || '');
 })
 ```
@@ -284,7 +282,6 @@ messaging().getToken().then(token => {
             pubPss: pubPssBase64,
             externalId: 'YOUR_EXTERNAL_ID',
             installationId: "9990",
-            enrollmentId: null
         })
     })
 ```
@@ -293,20 +290,16 @@ messaging().getToken().then(token => {
 If a user was successfully linked to a tenant and you now wish to unlink that user from your tenant on the Okay secure server, you can use the *unlinkTenant(tenantId, SpaStorage)* method to do this as shown below.
 
 ```javascript
-import messaging from '@react-native-firebase/messaging';
 
-messaging().getToken().then(token => {
-    RNOkaySdk.unlinkTenant(
-        tenantId,
-        {
-            appPns: token,
-            pubPss: pubPssBase64,
-            externalId: 'YOUR_EXTERNAL_ID',
-            installationId: "9990",
-            enrollmentId: null
-      })
-    })
-
+RNOkaySdk.unlinkTenant(
+  tenantId,
+  {
+    appPns: token,
+    pubPss: pubPssBase64,
+    externalId: 'YOUR_EXTERNAL_ID',
+    installationId: '9990',
+  }
+);
 ```
 
 
@@ -328,7 +321,7 @@ Push Notification Sample:
   {
     "collapseKey": "auth",
     "data": {
-      "data": "{\"expectedDeviceState\":\"dy6SxnlPsgY+bp1IlgOYgA0Z3becO+8W13Y1424qWAs=\",\"sessionExternalId\":\"000000\",\"tenantId\":000000,\"sessionId\":000000,\"params\":{\"DEVICE_UI_TYPE\":\"NATIVE\"}}",
+      "data": {“tenantId”:10000,“sessionId”:2680005,“params”:{“DEVICE_UI_TYPE”:“NATIVE”},“expectedDeviceState”:“ipmHQ3zVtVE6LIssTWGb4dJXS+ExkZk0QIA7qsBePx8=“,”sessionExternalId”:“960002”,“clientServerUrl”:“http://192.168.18.96:8080”,“isDisableMultipleRetry”:false}
       "sender": "PSS",
       "type": "10"
     },
@@ -348,48 +341,102 @@ messaging().onMessage(async message => {
   console.log('message: ', message);
   let data = JSON.parse(message.data.data);
   let response = await OkaySdk.startAuthorization({
+    clientServerUrl: data.clientServerUrl,
+    extSessionId: data.sessionExternalId,
+    isDisableMultipleRetry: false,
+    userExternalId: 'user-123445558999',
     deviceUiType: data.params.DEVICE_UI_TYPE,
     sessionId: data.sessionId,
-    appPns: deviceToken,
-    pageTheme: {
-      screenBackgroundColor: '#ffffff',
-      actionBarBackgroundColor: '#004ba0',
-      actionBarTextColor: '#ffd95a',
-      pinNumberButtonTextColor: '#000000',
-      pinNumberButtonBackgroundColor: '#ffd95a',
-      pinRemoveButtonBackgroundColor: '#ffd95a',
-      pinRemoveButtonTextColor: '#000000',
-      pinTitleTextColor: '#ffffff',
-      pinValueTextColor: '#ffffff',
-      titleTextColor: '#ffd95a',
-      questionMarkColor: '#63a4ff',
-      transactionTypeTextColor: '#000000',
-      authInfoBackgroundColor: '#ffd95a',
-      infoSectionTitleColor: '#ffffff',
-      infoSectionValueColor: '#000000',
-      fromTextColor: '#000000',
-      messageTextColor: '#000000',
-      confirmButtonBackgroundColor: '#ffd95a',
-      confirmButtonTextColor: '#000000',
-      cancelButtonBackgroundColor: '#63a4ff',
-      cancelButtonTextColor: '#ffffff',
-      authConfirmationButtonBackgroundColor: '#f9a825',
-      authConfirmationButtonTextColor: '#000000',
-      authCancellationButtonBackgroundColor: '#1976d2',
-      authCancellationButtonTextColor: '#ffffff',
-      nameTextColor: '#000000',
-      buttonBackgroundColor: '#63a4ff',
-      buttonTextColor: '#ffffff',
-      inputTextColor: '#000000',
-      inputSelectionColor: '#00FF00',
-      inputErrorColor: '#FF0000',
-      inputDefaultColor: '#888888',
-    },
+    appPns: appPushNotificationToken,
   });
   console.log(response);
 });
 
 ```
 
-### Page Theme properies for Android
-- https://github.com/Okaythis/okay-sdk-android/wiki/PageTheme-(Android)
+
+### The Okay In-App Login
+
+The Okay SDK provides in-app APIs for PIN and Biometric login on app start.
+
+#### PIN
+The following snippet allows you to start the PIN login screen with the Okay API.
+
+```javascript
+startPINLogin({
+  publicKeyInBase64: "your-public-key",
+  clientVerificationServerURL: "http://your-server-verification-url.com",
+  wrongPinRetries: 3,
+  userExternalId: "user-123445558999",
+})
+  .then(({ pinLoginStatus, payload, header, signature, protectedAlgo, statusCode, message }: OkayPINLoginResponse) => {
+    if (pinLoginStatus) {
+      console.log(` ${payload} ${header} ${signature} ${protectedAlgo}`);
+      return;
+    }
+    console.log(` ${statusCode} ${message}`);
+  })
+  .catch(console.error);
+
+```
+
+#### Customizing the Okay PIN Screen
+
+The Okay SDk allow you to customize the look and feel of the PIN screen both on Android and iOS.
+The SDK accepts the following properties that conforms to the OkayLoginTheme interface.
+
+```javascript
+export interface OkayLoginTheme {
+  pinTitleText?: string;
+  pinSubTitleText?: string;
+  forgotPinText?: string;
+  pinScreenBackgroundColor?: string;
+  pinTitleTextColor?: string;
+  pinSubTitleTextColor?: string;
+  pinFilledColor?: string;
+  pinPadTextColor?: string;
+  pinPadBackgroundColor?: string;
+  pinSubTitleErrorText?: string;
+  severErrorText?: string;
+  shuffleKeyPad?: boolean;
+}
+```
+
+This is an example on how to customise the login screen
+
+```javascript
+
+await setLoginTheme({
+  pinTitleText: "Login Title",
+  pinSubTitleText: "Enter PIN to login",
+  forgotPinText: "Forgot PIN?",
+  pinScreenBackgroundColor: "#ffffff",
+  pinTitleTextColor: "#ffd95a",
+  pinSubTitleTextColor: "#ffd95a",
+  pinFilledColor: "#ffd95a",
+  pinPadTextColor: '#ffffff',
+  pinPadBackgroundColor: '#ffffff',
+  pinSubTitleErrorText: "You entered a wrong PIN. Please try again",
+  severErrorText: "There was an error validating your PIN",
+  shuffleKeyPad: false,
+});
+
+```
+
+#### Biometric
+
+The following snippet allows you to start the Biometric login prompt with the Okay API.
+
+```javascript
+startBiometricLogin()
+  .then(({ biometricLoginStatus, payload, header, signature, protectedAlgo, status, message, sessionRemainingSeconds }: OkayBiometricLoginResponse) => {
+    if (biometricLoginStatus) {
+      console.log(` ${payload} ${header} ${signature} ${protectedAlgo}`);
+      return;
+    }
+    console.log(` ${status} ${message}`);
+  })
+  .catch(console.error);
+```
+
+Please reach out to the Okay support team to provide more information about the specification of the PIN and biometric login verification server for In-App login response.

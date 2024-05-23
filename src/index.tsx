@@ -70,6 +70,21 @@ export interface PSATheme {
   sessionTimerProgressColor?: string;
   sessionTimerTextColor?: string;
 }
+
+export interface OkayLoginTheme {
+  pinTitleText?: string;
+  pinSubTitleText?: string;
+  forgotPinText?: string;
+  pinScreenBackgroundColor?: string;
+  pinTitleTextColor?: string;
+  pinSubTitleTextColor?: string;
+  pinFilledColor?: string;
+  pinPadTextColor?: string;
+  pinPadBackgroundColor?: string;
+  pinSubTitleErrorText?: string;
+  severErrorText?: string;
+  shuffleKeyPad?: boolean;
+}
 export interface ResourceProvider {
   confirmButtonText?: string;
   cancelButtonText?: string;
@@ -223,7 +238,11 @@ export function startAuthorization(
 }
 
 export function startBiometricLogin(): Promise<OkayBiometricLoginResponse> {
-  return OkaySdk.startBiometricLogin();
+  return OkaySdk.startBiometricLogin(null);
+}
+
+export function setLoginTheme(loginTheme: OkayLoginTheme): Promise<String> {
+  return OkaySdk.setLoginTheme(loginTheme);
 }
 
 export function startPINLogin(loginData: OkayPINLogin): Promise<OkayPINLoginResponse> {
