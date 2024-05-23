@@ -138,7 +138,7 @@ Please visit this link to enable Push Notification for iOS devices when using Re
 We will need to call the initOkay(object) on the SDK to properly initialize the Okay SDK. For example we pass in 'https://demostand.okaythis.com/' as our Okay server endpoint.
 
 ```javascript
-  OkaySdk.initOkay({
+  initOkay({
       okayUrlEndpoint: 'https://demostand.okaythis.com',
   })
 ```
@@ -150,7 +150,7 @@ Okay initialisation method as can be seen below.
 
 ```javascript
 
-  OkaySdk.initOkay({
+  initOkay({
     okayUrlEndpoint: 'https://demostand.okaythis.com',
     fontConfig: [
       {
@@ -197,7 +197,7 @@ import messaging from '@react-native-firebase/messaging';
   if (enabled) {
     console.log('Authorization status:', authStatus);
     messaging().getToken().then(token => {
-      OkaySdk.updateDeviceToken(token || '');
+      updateDeviceToken(token || '');
     })
   }
 
@@ -212,7 +212,7 @@ You will need to update Okay with the push notification token generated for iOS 
 
 // If your are using APNS, your code will look similar to the following
 PushNotificationIOS.addEventListener('register', token => {
-    RNOkaySdk.updateDeviceToken(token);
+    updateDeviceToken(token);
 });
 
 ```
@@ -227,7 +227,7 @@ registration token generated for the iOS device.
 import messaging from '@react-native-firebase/messaging';
 
 messaging().getToken().then(token => {
-    OkaySdk.updateDeviceToken(token || '');
+    updateDeviceToken(token || '');
 })
 ```
 
@@ -238,7 +238,7 @@ If the required permissions have been granted on the device, we can now proceed 
 import messaging from '@react-native-firebase/messaging';
 
 messaging().getToken().then(token => {
-    RNOkaySdk.startEnrollment({
+    startEnrollment({
             appPns: token,
             pubPss: pubPssBase64,
             installationId: "9990",
@@ -270,13 +270,13 @@ SpaEnrollData contains several keys that are required for a secure communication
 ### **How to link a user**
 The linkTenant(linkingCode, SpaStorage) method links a user of your application with an existing tenant on the Okay secure server. When you make a linking request to the Okay server, it returns a linkingCode as part of its response (For more information on how to send a linking request please see this [documatation](https://okaythis.com/developer/documentation/v1/server#1.2)). The linking code can be passed directly to this method after a successful linking request to the Okay Service.
 
-The **externalId** can be retrieved from the *RNOkaySdk.startEnrollment(...).then( externalId => ...)* method, if the method was called and executed successfully.
+The **externalId** can be retrieved from the *startEnrollment(...).then( externalId => ...)* method, if the method was called and executed successfully.
 
 ```javascript
 import messaging from '@react-native-firebase/messaging';
 
 messaging().getToken().then(token => {
-    RNOkaySdk.linkTenant(
+    linkTenant(
         linkingCode,
         {
             appPns: token,
@@ -292,7 +292,7 @@ If a user was successfully linked to a tenant and you now wish to unlink that us
 
 ```javascript
 
-RNOkaySdk.unlinkTenant(
+unlinkTenant(
   tenantId,
   {
     appPns: token,
@@ -333,7 +333,7 @@ Push Notification Sample:
   }
 ```
 
-When the push notification is received on the client side, you should retrieve the **_sessionId_** and **_DEVICE_UI_TYPE_** properties from the push notification body. Pass in the **_sessionId_** and **_DEVICE_UI_TYPE_** value to **RNOkaySdk.startAuthorization(spaAuthData: SpaAuthData)** method as shown in the code snippet below:
+When the push notification is received on the client side, you should retrieve the **_sessionId_** and **_DEVICE_UI_TYPE_** properties from the push notification body. Pass in the **_sessionId_** and **_DEVICE_UI_TYPE_** value to **startAuthorization(spaAuthData: SpaAuthData)** method as shown in the code snippet below:
 
 ```javascript
 import messaging from '@react-native-firebase/messaging';
@@ -341,7 +341,7 @@ import messaging from '@react-native-firebase/messaging';
 messaging().onMessage(async message => {
   console.log('message: ', message);
   let data = JSON.parse(message.data.data);
-  let response = await OkaySdk.startAuthorization({
+  let response = await startAuthorization({
     clientServerUrl: data.clientServerUrl,
     extSessionId: data.sessionExternalId,
     isDisableMultipleRetry: false,
