@@ -1,25 +1,30 @@
 {
-  "name": "react-native-okay-sdk-example",
-  "description": "Example app for react-native-okay-sdk",
+  "name": "rn-okay-sdk-example",
   "version": "0.0.1",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "start": "react-native start",
-    "bundle": "react-native bundle --dev false --entry-file index.tsx --bundle-output ios/main.jsbundle --platform ios"
+    "build:android": "cd android && ./gradlew assembleDebug --no-daemon --console=plain -PreactNativeArchitectures=arm64-v8a",
+    "build:ios": "cd ios && xcodebuild -workspace RnOkaySdkExample.xcworkspace -scheme RnOkaySdkExample -configuration Debug -sdk iphonesimulator CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ GCC_OPTIMIZATION_LEVEL=0 GCC_PRECOMPILE_PREFIX_HEADER=YES ASSETCATALOG_COMPILER_OPTIMIZATION=time DEBUG_INFORMATION_FORMAT=dwarf COMPILER_INDEX_STORE_ENABLE=NO"
   },
   "dependencies": {
     "@react-native-firebase/app": "^19.2.2",
     "@react-native-firebase/messaging": "^19.2.2",
     "react": "18.2.0",
-    "react-native": "0.73.5"
+    "react-native": "0.74.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.24.0",
-    "@babel/runtime": "^7.24.0",
-    "@react-native/metro-config": "^0.72.12",
-    "babel-plugin-module-resolver": "^5.0.0",
-    "metro-react-native-babel-preset": "^0.77.0"
+    "@babel/core": "^7.20.0",
+    "@babel/preset-env": "^7.20.0",
+    "@babel/runtime": "^7.20.0",
+    "@react-native/babel-preset": "0.74.81",
+    "@react-native/metro-config": "0.74.81",
+    "@react-native/typescript-config": "0.74.81",
+    "babel-plugin-module-resolver": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

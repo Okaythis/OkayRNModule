@@ -1,33 +1,35 @@
 import * as React from 'react';
 
 import {
-  StyleSheet,
-  View,
-  Text,
-  SafeAreaView,
-  TextInput,
-  ActivityIndicator,
-  TouchableOpacity,
   Platform,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import {
-  startAuthorization,
-  startEnrollment,
+  initOkay,
   linkTenant,
+  type OkayBiometricLoginResponse,
+  type OkayLinkResponse,
+  type OkayPINLoginResponse,
+  startAuthorization,
+  startBiometricLogin,
+  startEnrollment,
+  startPINLogin,
   unlinkTenant,
   updateDeviceToken,
-  OkayLinkResponse,
-  initOkay, startBiometricLogin, OkayBiometricLoginResponse, OkayPINLoginResponse, startPINLogin, setLoginTheme,
-} from 'react-native-okay-sdk';
+} from 'rn-okay-sdk';
 
 import messaging from '@react-native-firebase/messaging';
-// import firebase from '@react-native-firebase/app';
 
 let installationID = Platform.OS === 'android' ? '9990' : '9980';
 const pubPssBase64 =
   'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxgyacF1NNWTA6rzCrtK60se9fVpTPe3HiDjHB7MybJvNdJZIgZbE9k3gQ6cdEYgTOSG823hkJCVHZrcf0/AK7G8Xf/rjhWxccOEXFTg4TQwmhbwys+sY/DmGR8nytlNVbha1DV/qOGcqAkmn9SrqW76KK+EdQFpbiOzw7RRWZuizwY3BqRfQRokr0UBJrJrizbT9ZxiVqGBwUDBQrSpsj3RUuoj90py1E88ExyaHui+jbXNITaPBUFJjbas5OOnSLVz6GrBPOD+x0HozAoYuBdoztPRxpjoNIYvgJ72wZ3kOAVPAFb48UROL7sqK2P/jwhdd02p/MDBZpMl/+BG+qQIDAQAB';
 
-let appAPNT= ''
+let appAPNT = '';
 
 async function requestUserPermission(callback: (token: string) => void) {
   const authStatus = await messaging().requestPermission();
@@ -38,7 +40,7 @@ async function requestUserPermission(callback: (token: string) => void) {
     console.log('Authorization status:', authStatus);
     messaging()
       .getToken()
-      .then((token) => {
+      .then((token: string) => {
         console.log('token: ', token);
         updateDeviceToken(token || '');
         callback(token);
@@ -49,47 +51,36 @@ async function requestUserPermission(callback: (token: string) => void) {
 
 async function initSdk(callback: (token: string) => void) {
   try {
-    requestUserPermission(callback);
+    await requestUserPermission(callback);
+
     const response = await initOkay({
-      okayUrlEndpoint: 'https://stage.okaythis.com',
+      okayUrlEndpoint: 'https://demostand.okaythis.com',
       resourceProvider: {
-        androidBiometricPromptSubTitle: "Biometric authorisation",
-        androidConfirmBiometricButtonText: "Authorise",
-        confirmButtonText: "Confirm",
-        cancelButtonText: "Cancel",
-        massPaymentDetailsButtonText: "Test",
-        feeLabelText: "Test",
-        recipientLabelText: "Test",
-        enrollmentTitleText: "Test",
-        enrollmentDescriptionText: "Test",
-        androidScreenhotsNotificationIconId: "ic_menu_camera",
-        androidScreenshotsChannelName: "Test",
-        androidTransactionDetails: "Test",
-        androidScreenshotsNotificationText: "Test",
-        androidAuthScreenTitle: "Authorise",
-        androidBiometricPromptTitle: "Biometric Title",
-        androidAuthorizationProgressViewText: "Test",
-        androidBiometricPromptDescription: "Please authenticate this transaction",
-        iosBiometricAlertReasonText: "Test Alert",
-        iosConfirmBiometricTouchButtonText: "Test",
-        iosConfirmBiometricFaceButtonText: "Test",
-        iosMassPaymentDetailsHeaderText: "Test",
+        androidBiometricPromptSubTitle: 'Biometric authorisation',
+        androidConfirmBiometricButtonText: 'Authorise',
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
+        massPaymentDetailsButtonText: 'Test',
+        feeLabelText: 'Test',
+        recipientLabelText: 'Test',
+        enrollmentTitleText: 'Test',
+        enrollmentDescriptionText: 'Test',
+        androidScreenhotsNotificationIconId: 'ic_menu_camera',
+        androidScreenshotsChannelName: 'Test',
+        androidTransactionDetails: 'Test',
+        androidScreenshotsNotificationText: 'Test',
+        androidAuthScreenTitle: 'Authorise',
+        androidBiometricPromptTitle: 'Biometric Title',
+        androidAuthorizationProgressViewText: 'Test',
+        androidBiometricPromptDescription:
+          'Please authenticate this transaction',
+        iosBiometricAlertReasonText: 'Test Alert',
+        iosConfirmBiometricTouchButtonText: 'Test',
+        iosConfirmBiometricFaceButtonText: 'Test',
+        iosMassPaymentDetailsHeaderText: 'Test',
       },
     });
-    await setLoginTheme({
-      pinTitleText: "Login Title",
-      pinSubTitleText: "Enter PIN to login",
-      forgotPinText: "Forgot PIN?",
-      pinScreenBackgroundColor: "#ffffff",
-      pinTitleTextColor: "#ffd95a",
-      pinSubTitleTextColor: "#ffd95a",
-      pinFilledColor: "#ffd95a",
-      pinPadTextColor: '#ffffff',
-      pinPadBackgroundColor: '#ffffff',
-      pinSubTitleErrorText: "You entered a wrong PIN. Please try again",
-      severErrorText: "There was an error validating your PIN",
-      shuffleKeyPad: false,
-    });
+
     console.log('Init sdk status: ', response.initStatus);
   } catch (error) {
     console.error('Error init sdk', error);
@@ -98,19 +89,18 @@ async function initSdk(callback: (token: string) => void) {
 
 export default function App() {
   const [linkingCode, setLinkingCode] = React.useState('');
-  const [sessionId, setSessionId] = React.useState('');
   const [tenantId, setTenantId] = React.useState<number>();
   const [deviceToken, setDeviceToken] = React.useState('');
-  const [externalId, setExternalId] = React.useState('');
+  const [externalId] = React.useState('');
 
   React.useEffect(() => {
-    initSdk(setDeviceToken).catch(e => `${e}`);
-    messaging().onMessage(async (remoteMessage) => {
+    initSdk(setDeviceToken).catch((e) => `${e}`);
+    messaging().onMessage(async (remoteMessage: any) => {
       console.log('A new FCM message received!', remoteMessage.data?.data);
       const data = JSON.parse(remoteMessage?.data?.data as string);
-      const id = data?.sessionId;
-      console.log(data.params.DEVICE_UI_TYPE);
-      setSessionId(id?.toString() ?? '');
+      // const id = data?.sessionId;
+      // console.log(data.params.DEVICE_UI_TYPE);
+
       let response = await startAuthorization({
         clientServerUrl: '',
         extSessionId: '',
@@ -153,10 +143,10 @@ export default function App() {
           inputErrorColor: '#FF0000',
           inputDefaultColor: '#888888',
           tenantName: '',
-          tenantLogoPath: ''
+          tenantLogoPath: '',
         },
-      }).catch(e => {
-        console.log(e)
+      }).catch((e) => {
+        console.log(e);
       });
       console.log(response);
     });
@@ -174,10 +164,10 @@ export default function App() {
       externalId: externalId,
       installationId: installationID,
     })
-      .then(({ linkingSuccessStatus, tenantId }: OkayLinkResponse) => {
+      .then(({ linkingSuccessStatus, _tenantId }: OkayLinkResponse) => {
         if (linkingSuccessStatus) {
-          setTenantId(tenantId);
-          console.log(`linking status: ${linkingSuccessStatus}`)
+          setTenantId(_tenantId);
+          console.log(`linking status: ${linkingSuccessStatus}`);
         }
       })
       .catch(console.error);
@@ -185,30 +175,36 @@ export default function App() {
 
   const onStartBiometricLoginClick = () => {
     startBiometricLogin()
-      .then(({ biometricLoginStatus, payload, header, signature, protectedAlgo, status, message, sessionRemainingSeconds }: OkayBiometricLoginResponse) => {
-        if (biometricLoginStatus) {
-          console.log(` ${payload} ${header} ${signature} ${protectedAlgo}`);
-          return;
-        }
-        console.log(` ${status} ${message}`);
+      .then((response: OkayBiometricLoginResponse) => {
+        console.log(response);
       })
       .catch(console.error);
   };
 
   const onStartPINLoginClick = () => {
     startPINLogin({
-      publicKeyInBase64: "tyty",
-      clientVerificationServerURL: "http://okay.com",
+      publicKeyInBase64: 'tyty',
+      clientVerificationServerURL: 'http://okay.com',
       wrongPinRetries: 3,
-      userExternalId: "string",
+      userExternalId: 'string',
     })
-      .then(({ pinLoginStatus, payload, header, signature, protectedAlgo, statusCode, message }: OkayPINLoginResponse) => {
-        if (pinLoginStatus) {
-          console.log(` ${payload} ${header} ${signature} ${protectedAlgo}`);
-          return;
+      .then(
+        ({
+          pinLoginStatus,
+          payload,
+          header,
+          signature,
+          protectedAlgo,
+          statusCode,
+          message,
+        }: OkayPINLoginResponse) => {
+          if (pinLoginStatus) {
+            console.log(` ${payload} ${header} ${signature} ${protectedAlgo}`);
+            return;
+          }
+          console.log(`${statusCode} ${message}`);
         }
-        console.log(` ${statusCode} ${message}`);
-      })
+      )
       .catch(console.error);
   };
 
@@ -229,12 +225,15 @@ export default function App() {
       pubPss: pubPssBase64,
       enrollInBackground: true,
       installationId: installationID,
-    }).then((response) => {
-      setExternalId(response.externalId);
-      console.log(response)
-    });
+    })
+      .then((response) => {
+        console.log(response);
+        // setExternalId(response.externalId);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   };
-
 
   return (
     <SafeAreaView>
@@ -255,7 +254,10 @@ export default function App() {
         <TouchableOpacity style={styles.button} onPress={onStartPINLoginClick}>
           <Text style={styles.buttonText}>PIN Login</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={onStartBiometricLoginClick}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={onStartBiometricLoginClick}
+        >
           <Text style={styles.buttonText}>Biometric Login</Text>
         </TouchableOpacity>
 
@@ -273,16 +275,6 @@ export default function App() {
     </SafeAreaView>
   );
 }
-
-const Loader = () => {
-  return (
-        <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color="#0000ff" />
-          <Text>Loading...</Text>
-        </View>
-  );
-};
-
 
 const styles = StyleSheet.create({
   container: {
