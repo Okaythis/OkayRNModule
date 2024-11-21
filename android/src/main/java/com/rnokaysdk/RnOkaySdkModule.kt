@@ -388,6 +388,8 @@ class RnOkaySdkModule(reactContext: ReactApplicationContext) :
     val pageThemeMap = data.getMap("pageTheme")
     val psaType = PsaType.OKAY
 
+    val handler = Handler(Looper.getMainLooper());
+
     val resultListener =
       TransactionResultListener { resultCode, data ->
         data?.let {
@@ -443,11 +445,15 @@ class RnOkaySdkModule(reactContext: ReactApplicationContext) :
         }
 
         if (deviceUiType == "FLUTTER") {
-          PsaManager.getInstance()
-            .startAuthorizationWithAbstractUI(activity, authorizationData, resultListener)
+          handler.post {
+            PsaManager.getInstance()
+              .startAuthorizationWithAbstractUI(activity, authorizationData, resultListener)
+          }
           return
         }
-        PsaManager.startAuthorizationActivity(activity, authorizationData)
+        handler.post{
+          PsaManager.startAuthorizationActivity(activity, authorizationData)
+        }
       }
       ?: promise.reject("", "sessionId or appPns were not provided")
   }
