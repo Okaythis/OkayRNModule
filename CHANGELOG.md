@@ -1,6 +1,5 @@
-## v0.3.0
+## v0.4.0
 
 ## Latest Changes
-- Upgrade the Android SDK to v1.14.18
-- Upgrade the iOS SDK to v1.2.22
-- Fix the threading issue on Android
+- Upgrade the iOS SDK to v1.3.1
+- Upgrade the FCC package to v1.5.0 on iOS
