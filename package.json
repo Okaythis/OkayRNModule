@@ -1,6 +1,6 @@
 {
   "name": "rn-okay-sdk",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "This is the React Native package for the Okay SDK.",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",

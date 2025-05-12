@@ -1263,7 +1263,7 @@ PODS:
     - React-logger (= 0.74.0)
     - React-perflogger (= 0.74.0)
     - React-utils (= 0.74.0)
-  - rn-okay-sdk (0.3.0):
+  - rn-okay-sdk (0.4.0):
     - DoubleConversion
     - FlutterCommunicationChannel (~> 1.5.0)
     - glog
@@ -1575,7 +1575,7 @@ SPEC CHECKSUMS:
   React-runtimescheduler: 7fe561d179b97cecd0c2bec0bbd08f9fd8581c26
   React-utils: f013537c3371270d2095bff1d594d00d4bc9261b
   ReactCommon: 2cde697fd80bd31da1d6448d25a5803088585219
-  rn-okay-sdk: ef0da79ca8143a8136fac2794ed288b5fe5aee03
+  rn-okay-sdk: 198b39a37d3701b3ff970b6e746bdbd2fd729e10
   RNFBApp: 614f1621b49db54ebd258df8c45427370d8d84a2
   RNFBMessaging: 74754ed198239360950f54f3e3de365fe85db451
   SocketRocket: abac6f5de4d4d62d24e11868d7a2f427e0ef940d
