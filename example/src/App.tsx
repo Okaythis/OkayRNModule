@@ -54,7 +54,7 @@ async function initSdk(callback: (token: string) => void) {
     await requestUserPermission(callback);
 
     const response = await initOkay({
-      okayUrlEndpoint: 'https://demostand.okaythis.com',
+      okayUrlEndpoint: 'https://stage.okaythis.com',
       resourceProvider: {
         androidBiometricPromptSubTitle: 'Biometric authorisation',
         androidConfirmBiometricButtonText: 'Authorise',
