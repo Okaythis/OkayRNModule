@@ -7,11 +7,16 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+  if ([FIRApp defaultApp] == nil) {
+    [FIRApp configure];
+  }
+  
+  // ⚙️ Bridgeless React Native setup
+  
   self.moduleName = @"RnOkaySdkExample";
   // You can add your custom initial props in the dictionary below.
   // They will be passed down to the ViewController used by React Native.
   self.initialProps = @{};
-  [FIRApp configure];
   [application registerForRemoteNotifications];
 
   return [super application:application didFinishLaunchingWithOptions:launchOptions];

@@ -1,5 +1,6 @@
-## v0.5.0
+## v0.7.0
 
 ## Latest Changes
-- Upgrade the Android SDK to v1.17.0
-- Upgrade the FCC package to v1.5.0 on iOS
+- Upgrade FCC to v2.x on Android and iOS
+- Update iOS SDK to v1.3.2
+- Upgrade Android SDK to v1.18.1
