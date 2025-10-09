@@ -152,6 +152,7 @@ Okay initialisation method as can be seen below.
 
   initOkay({
     okayUrlEndpoint: 'https://demostand.okaythis.com',
+    preferredCodeBlocksVersion: "1.18.3",
     fontConfig: [
       {
         fontVariant: 'FiraGO_200italic',
@@ -166,6 +167,9 @@ Okay initialisation method as can be seen below.
       console.error('error: ', error);
     })
 ```
+
+The Okay platform allow customers to upload multiple version of code blocks. The `preferredCodeBlocksVersion` code blocks property allows you set the preferred code-blocks that you want the current release of your application to use.
+Only use this property if you are certain that you do not want a dynamic code block upgrade. Please contact the Okay support team for more information.
 
 The fontConfig property takes an array of the FontVariants datatype.
 
