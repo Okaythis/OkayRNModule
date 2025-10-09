@@ -1,6 +1,6 @@
-## v0.7.0
+## v0.8.0
 
 ## Latest Changes
-- Upgrade FCC to v2.x on Android and iOS
-- Update iOS SDK to v1.3.2
-- Upgrade Android SDK to v1.18.1
+- Upgrade Android SDK to v1.18.3
+- Add Android `setPreferredCodeBlocks` property to the `initOkay()` function.
+- Fix example Gradle build issue. Upgrade to Gradle 8.7.0

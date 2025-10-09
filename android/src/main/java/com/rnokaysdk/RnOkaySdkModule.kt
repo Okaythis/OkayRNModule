@@ -189,6 +189,7 @@ class RnOkaySdkModule(reactContext: ReactApplicationContext) :
     val okayUrlEndpoint = data.getString("okayUrlEndpoint")
     val resourceProviderMap = data.getMap("resourceProvider")
     val fontConfigArray = data.getArray("fontConfig")
+    val preferredCodeBlocksVersion = data.getString("preferredCodeBlocksVersion")
     val fontConfig = arrayListOf<LocalFontConfig>()
 
     if (fontConfigArray != null) {
@@ -250,6 +251,9 @@ class RnOkaySdkModule(reactContext: ReactApplicationContext) :
         OkayRNExceptionLogger(),
         TransactionResourceProvider(reactContext)
       )
+    }
+    if(!preferredCodeBlocksVersion.isNullOrEmpty()){
+      psaManager!!.setPreferredCodeBlocksVersion(preferredCodeBlocksVersion)
     }
 
     if (!okayUrlEndpoint.isNullOrEmpty()) {

@@ -118,6 +118,7 @@ export interface InitData {
   okayUrlEndpoint: string;
   resourceProvider: ResourceProvider;
   fontConfig?: Array<FontVariants>;
+  preferredCodeBlocksVersion?: string;
 }
 
 export interface SpaEnrollData {
