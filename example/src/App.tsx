@@ -105,7 +105,7 @@ export default function App() {
       let response = await startAuthorization({
         clientServerUrl: '',
         extSessionId: '',
-        isDisableMultipleRetry: false,
+        isDisableMultipleRetry: data.isDisableMultipleRetry,
         userExternalId: '',
         deviceUiType: data.params.DEVICE_UI_TYPE,
         sessionId: data.sessionId,

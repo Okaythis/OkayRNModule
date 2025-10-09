@@ -348,7 +348,7 @@ messaging().onMessage(async message => {
   let response = await startAuthorization({
     clientServerUrl: data.clientServerUrl,
     extSessionId: data.sessionExternalId,
-    isDisableMultipleRetry: false,
+    isDisableMultipleRetry: data.isDisableMultipleRetry,
     userExternalId: 'user-123445558999',
     deviceUiType: data.params.DEVICE_UI_TYPE,
     sessionId: data.sessionId,
